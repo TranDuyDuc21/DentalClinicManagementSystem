@@ -24,3 +24,11 @@ body.auth-page {
     font-size: 3rem;
     color: var(--primary);
 }
+
+.auth-card-wide {
+    max-width: 580px;
+}
+
+.password-strength {
+    min-height: 20px;
+}
