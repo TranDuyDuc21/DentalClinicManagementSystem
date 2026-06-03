@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-Content \"c:\\\\Users\\\\admin\\\\Documents\\\\Support\\\\SWP\\\\DentalClinicManagementSystem\\\\pom.xml\")",
+      "Bash(Select-Object -First 40)"
+    ]
+  }
+}
