@@ -373,3 +373,11 @@ INSERT INTO users (role_id, username, email, password_hash, full_name, phone_num
   (3, 'doctor_test', 'doctor@dental.com', '123456', 'Bác Sĩ Trưởng Khoa', '0901234569', TRUE),
   (4, 'tech_test', 'tech@dental.com', '123456', 'Kỹ Thuật Viên', '0901234570', TRUE),
   (5, 'customer_test', 'customer@dental.com', '123456', 'Khách Hàng Vip', '0901234571', TRUE);
+
+-- =====================================================
+-- SEED PATIENTS
+-- =====================================================
+INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, phone_number, email, address, medical_history, drug_allergies) VALUES
+  ('PT-2026-0001', 5, 'Khách Hàng Vip', '1990-05-15', 'Male', '0901234571', 'customer@dental.com', '123 Nguyễn Văn Cừ, Quận 5, TP.HCM', 'Không có bệnh lý nền', 'Không'),
+  ('PT-2026-0002', NULL, 'Nguyễn Thị Thu Hương', '1985-08-22', 'Female', '0987654321', 'huongnt@email.com', '456 Lê Lợi, Quận 1, TP.HCM', 'Huyết áp thấp', 'Dị ứng thuốc tê nhẹ'),
+  ('PT-2026-0003', NULL, 'Trần Văn Nam', '2000-11-10', 'Male', '0912345678', 'namtran@email.com', '789 Xa Lộ Hà Nội, TP. Thủ Đức', 'Tiểu đường tuýp 2', 'Penicillin');

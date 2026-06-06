@@ -69,7 +69,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="${pageContext.request.contextPath}/reception/patients" class="nav-link">
+                    <a href="${pageContext.request.contextPath}/patients" class="nav-link ${currentPage == 'patients' ? 'active' : ''}">
                         <i class="fa-solid fa-id-card nav-icon"></i>
                         <span class="nav-text">Hồ sơ bệnh nhân</span>
                     </a>
