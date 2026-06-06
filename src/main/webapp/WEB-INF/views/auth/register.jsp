@@ -168,10 +168,10 @@
         const colors = ['', '#dc3545', '#fd7e14', '#0d6efd', '#198754'];
         bar.innerHTML = val.length === 0 ? '' :
             `<div class="d-flex align-items-center gap-2">
-                ${[1,2,3,4].map(i =>
-                    `<div style="height:4px;flex:1;border-radius:2px;background:${i <= strength ? colors[strength] : '#dee2e6'}"></div>`
+                \${[1,2,3,4].map(i =>
+                    `<div style="height:4px;flex:1;border-radius:2px;background:\${i <= strength ? colors[strength] : '#dee2e6'}"></div>`
                 ).join('')}
-                <span class="small" style="color:${colors[strength]};white-space:nowrap">${labels[strength]}</span>
+                <span class="small" style="color:\${colors[strength]};white-space:nowrap">\${labels[strength]}</span>
             </div>`;
     });
 

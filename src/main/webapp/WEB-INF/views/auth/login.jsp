@@ -1,89 +1,48 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Dental Clinic</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/common/variables.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/pages/auth.css">
-</head>
-<body class="auth-page">
+<jsp:include page="/WEB-INF/views/layout/header.jsp">
+    <jsp:param name="pageTitle" value="Đăng Nhập - Dental Clinic" />
+</jsp:include>
 
-<div class="auth-card">
-    <div class="auth-logo">
-        <i class="bi bi-hospital"></i>
-        <h4 class="fw-bold mt-2">Dental Clinic</h4>
-        <p class="text-muted small">Hệ thống quản lý phòng khám nha khoa</p>
+<div class="flex-center">
+    <div class="card auth-wrapper">
+        <div class="auth-header">
+            <div style="margin-bottom: 16px; color: var(--primary);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="M9 12l2 2 4-4"></path>
+                </svg>
+            </div>
+            <h1>Đăng Nhập</h1>
+            <p>Vui lòng đăng nhập vào hệ thống</p>
+        </div>
+
+        <jsp:include page="/WEB-INF/views/components/messages.jsp" />
+
+        <form action="${pageContext.request.contextPath}/login" method="POST" class="validate-form">
+            <div class="form-group">
+                <label for="identifier" class="form-label">Tên đăng nhập hoặc Email</label>
+                <input type="text" id="identifier" name="identifier" class="form-control" 
+                       value="${identifier}" required 
+                       placeholder="Nhập tên đăng nhập hoặc email">
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input type="password" id="password" name="password" class="form-control" 
+                       required placeholder="Nhập mật khẩu">
+            </div>
+
+            <div class="form-group mb-3 text-right">
+                <a href="${pageContext.request.contextPath}/forgot-password" class="text-primary" style="text-decoration: none; font-size: 0.9rem;">Quên mật khẩu?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Đăng Nhập</button>
+        </form>
+
+        <div class="text-center" style="margin-top: 16px; font-size: 0.9rem;">
+            Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register" class="text-primary" style="text-decoration: none; font-weight: 500;">Đăng ký ngay</a>
+        </div>
     </div>
-
-    <c:if test="${not empty errorMessage}">
-        <div class="alert alert-danger py-2">
-            <i class="bi bi-exclamation-triangle me-1"></i>${errorMessage}
-        </div>
-    </c:if>
-    <c:if test="${not empty successMessage}">
-        <div class="alert alert-success py-2">
-            <i class="bi bi-check-circle me-1"></i>${successMessage}
-        </div>
-    </c:if>
-
-    <form action="${pageContext.request.contextPath}/login" method="post" novalidate>
-        <div class="mb-3">
-            <label class="form-label fw-medium">Tên đăng nhập</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" name="username" class="form-control"
-                       placeholder="Nhập tên đăng nhập" required autofocus
-                       value="${not empty param.username ? param.username : ''}">
-            </div>
-        </div>
-        <div class="mb-3">
-            <label class="form-label fw-medium">Mật khẩu</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input type="password" name="password" id="passwordInput" class="form-control"
-                       placeholder="Nhập mật khẩu" required>
-                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                    <i class="bi bi-eye" id="toggleIcon"></i>
-                </button>
-            </div>
-        </div>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
-                <label class="form-check-label small" for="rememberMe">Ghi nhớ đăng nhập</label>
-            </div>
-            <a href="${pageContext.request.contextPath}/forgot-password"
-               class="text-decoration-none small">Quên mật khẩu?</a>
-        </div>
-        <button type="submit" class="btn btn-primary w-100 fw-medium">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-        </button>
-    </form>
-
-    <p class="text-center text-muted small mt-3 mb-0">
-        Chưa có tài khoản?
-        <a href="${pageContext.request.contextPath}/register" class="text-decoration-none fw-medium">Đăng ký ngay</a>
-    </p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.getElementById('togglePassword').addEventListener('click', function () {
-        const input = document.getElementById('passwordInput');
-        const icon  = document.getElementById('toggleIcon');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.className = 'bi bi-eye-slash';
-        } else {
-            input.type = 'password';
-            icon.className = 'bi bi-eye';
-        }
-    });
-</script>
-</body>
-</html>
+<jsp:include page="/WEB-INF/views/layout/footer.jsp" />

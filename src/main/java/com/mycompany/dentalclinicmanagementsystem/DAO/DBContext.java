@@ -8,7 +8,7 @@ public class DBContext {
 
     private static final String URL      = "jdbc:mysql://localhost:3306/dental_clinic?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "123456";
 
     static {
         try {

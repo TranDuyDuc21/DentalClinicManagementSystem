@@ -198,11 +198,11 @@ CREATE TABLE visits (
 
 -- Tooth/gum condition by position - dental chart (UC19)
 CREATE TABLE dental_chart_entries (
-  entry_id      INT AUTO_INCREMENT PRIMARY KEY,
-  visit_id      INT NOT NULL,
-  tooth_position VARCHAR(10) NOT NULL,              -- e.g. FDI '11','48'
-  condition     VARCHAR(150),
-  note          TEXT,
+  entry_id       INT AUTO_INCREMENT PRIMARY KEY,
+  visit_id       INT NOT NULL,
+  tooth_position VARCHAR(10) NOT NULL,
+  `condition`    VARCHAR(150),
+  note           TEXT,
   FOREIGN KEY (visit_id) REFERENCES visits(visit_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
