@@ -1,4 +1,4 @@
-package com.mycompany.dentalclinicmanagementsystem.DAO;
+package com.mycompany.dentalclinicmanagementsystem.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
