@@ -64,28 +64,50 @@ public class PatientDAO {
         return false;
     }
 
-    public java.util.List<Patient> getAllPatients() {
+    public java.util.List<Patient> getAllPatients(String search, String gender) {
         java.util.List<Patient> patients = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM patients ORDER BY created_at DESC";
+        StringBuilder sql = new StringBuilder("SELECT * FROM patients WHERE 1=1 ");
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (full_name LIKE ? OR patient_code LIKE ? OR phone_number LIKE ?) ");
+        }
+        if (gender != null && !gender.trim().isEmpty()) {
+            sql.append("AND gender = ? ");
+        }
+        
+        sql.append("ORDER BY created_at DESC");
+
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
              
-            while (rs.next()) {
-                Patient p = new Patient();
-                p.setPatientId(rs.getInt("patient_id"));
-                p.setPatientCode(rs.getString("patient_code"));
-                p.setUserId(rs.getObject("user_id") != null ? rs.getInt("user_id") : null);
-                p.setFullName(rs.getString("full_name"));
-                p.setDateOfBirth(rs.getDate("date_of_birth"));
-                p.setGender(rs.getString("gender"));
-                p.setPhoneNumber(rs.getString("phone_number"));
-                p.setEmail(rs.getString("email"));
-                p.setAddress(rs.getString("address"));
-                p.setMedicalHistory(rs.getString("medical_history"));
-                p.setDrugAllergies(rs.getString("drug_allergies"));
-                p.setCreatedAt(rs.getTimestamp("created_at"));
-                patients.add(p);
+            int paramIndex = 1;
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (gender != null && !gender.trim().isEmpty()) {
+                ps.setString(paramIndex++, gender.trim());
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Patient p = new Patient();
+                    p.setPatientId(rs.getInt("patient_id"));
+                    p.setPatientCode(rs.getString("patient_code"));
+                    p.setUserId(rs.getObject("user_id") != null ? rs.getInt("user_id") : null);
+                    p.setFullName(rs.getString("full_name"));
+                    p.setDateOfBirth(rs.getDate("date_of_birth"));
+                    p.setGender(rs.getString("gender"));
+                    p.setPhoneNumber(rs.getString("phone_number"));
+                    p.setEmail(rs.getString("email"));
+                    p.setAddress(rs.getString("address"));
+                    p.setMedicalHistory(rs.getString("medical_history"));
+                    p.setDrugAllergies(rs.getString("drug_allergies"));
+                    p.setCreatedAt(rs.getTimestamp("created_at"));
+                    patients.add(p);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

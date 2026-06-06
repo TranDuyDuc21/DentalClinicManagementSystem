@@ -35,7 +35,10 @@ public class PatientListServlet extends HttpServlet {
             return;
         }
 
-        List<Patient> patients = patientDAO.getAllPatients();
+        String search = request.getParameter("search");
+        String gender = request.getParameter("gender");
+
+        List<Patient> patients = patientDAO.getAllPatients(search, gender);
         request.setAttribute("patients", patients);
         
         request.getRequestDispatcher("/WEB-INF/views/patient/patient-list.jsp").forward(request, response);
