@@ -381,3 +381,15 @@ INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, p
   ('PT-2026-0001', 5, 'Khách Hàng Vip', '1990-05-15', 'Male', '0901234571', 'customer@dental.com', '123 Nguyễn Văn Cừ, Quận 5, TP.HCM', 'Không có bệnh lý nền', 'Không'),
   ('PT-2026-0002', NULL, 'Nguyễn Thị Thu Hương', '1985-08-22', 'Female', '0987654321', 'huongnt@email.com', '456 Lê Lợi, Quận 1, TP.HCM', 'Huyết áp thấp', 'Dị ứng thuốc tê nhẹ'),
   ('PT-2026-0003', NULL, 'Trần Văn Nam', '2000-11-10', 'Male', '0912345678', 'namtran@email.com', '789 Xa Lộ Hà Nội, TP. Thủ Đức', 'Tiểu đường tuýp 2', 'Penicillin');
+
+-- =====================================================
+-- SEED SERVICES
+-- =====================================================
+INSERT INTO services (service_name, estimated_minutes, listed_price, description, is_active) VALUES
+  ('Khám Tổng Quát & Tư Vấn', 30, 0.00, 'Khám, chụp X-quang cơ bản và tư vấn phác đồ điều trị ban đầu.', TRUE),
+  ('Cạo Vôi Răng & Đánh Bóng', 45, 300000.00, 'Làm sạch mảng bám, cao răng và đánh bóng bề mặt răng.', TRUE),
+  ('Tẩy Trắng Răng Laser', 60, 2500000.00, 'Tẩy trắng răng công nghệ Laser tiên tiến, không ê buốt.', TRUE),
+  ('Nhổ Răng Khôn (Mọc thẳng)', 45, 1000000.00, 'Nhổ răng khôn hàm trên/dưới mọc thẳng, không tiểu phẫu.', TRUE),
+  ('Trám Răng Thẩm Mỹ', 30, 400000.00, 'Trám composite thẩm mỹ cao cho răng sâu, sứt mẻ nhẹ.', TRUE),
+  ('Bọc Răng Sứ Cercon', 120, 5000000.00, 'Bọc răng sứ toàn sứ Cercon nhập khẩu Đức, bảo hành 10 năm.', TRUE),
+  ('Niềng Răng Mắc Cài Kim Loại', 60, 30000000.00, 'Chỉnh nha bằng mắc cài kim loại tiêu chuẩn.', FALSE);
