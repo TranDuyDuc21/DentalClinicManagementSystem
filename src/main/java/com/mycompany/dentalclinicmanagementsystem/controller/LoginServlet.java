@@ -29,7 +29,12 @@ public class LoginServlet extends HttpServlet {
         
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("loggedUser") != null) {
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            User user = (User) session.getAttribute("loggedUser");
+            if ("Customer".equals(user.getRoleName())) {
+                response.sendRedirect(request.getContextPath() + "/home");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            }
             return;
         }
 
@@ -55,7 +60,11 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession(true);
             session.setAttribute("loggedUser", user);
             
-            response.sendRedirect(request.getContextPath() + "/dashboard");
+            if ("Customer".equals(user.getRoleName())) {
+                response.sendRedirect(request.getContextPath() + "/home");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/dashboard");
+            }
         } else {
             request.setAttribute("errorMessage", "Tên đăng nhập/email hoặc mật khẩu không đúng.");
             request.setAttribute("identifier", identifier);

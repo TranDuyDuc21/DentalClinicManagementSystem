@@ -363,3 +363,13 @@ INSERT INTO roles (role_name, description) VALUES
   ('Doctor','Bác sĩ'),
   ('Technician','Kỹ thuật viên'),
   ('Customer','Khách hàng / Bệnh nhân');
+
+-- =====================================================
+-- Mật khẩu : 123456
+-- =====================================================
+INSERT INTO users (role_id, username, email, password_hash, full_name, phone_number, is_active) VALUES
+  (1, 'admin_test', 'admin@dental.com', '123456', 'Quản Trị Viên', '0901234567', TRUE),
+  (2, 'reception_test', 'reception@dental.com', '123456', 'Nhân Viên Lễ Tân', '0901234568', TRUE),
+  (3, 'doctor_test', 'doctor@dental.com', '123456', 'Bác Sĩ Trưởng Khoa', '0901234569', TRUE),
+  (4, 'tech_test', 'tech@dental.com', '123456', 'Kỹ Thuật Viên', '0901234570', TRUE),
+  (5, 'customer_test', 'customer@dental.com', '123456', 'Khách Hàng Vip', '0901234571', TRUE);
