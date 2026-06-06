@@ -3,7 +3,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // 1. Auto dismiss alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
     if (alerts.length > 0) {
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Real-time Validation System
     const validateForms = document.querySelectorAll('.validate-form');
-    
+
     const rules = {
         required: (value) => value.trim() !== '' || 'Trường này không được để trống.',
         email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Email không hợp lệ.',
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     validateForms.forEach(form => {
         // Find all inputs that need validation
         const inputs = form.querySelectorAll('input, select, textarea');
-        
+
         inputs.forEach(input => {
             // Real-time validation on blur and input
             input.addEventListener('blur', () => validateInput(input));
@@ -49,17 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Form submit validation
-        form.addEventListener('submit', function(event) {
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent submit immediately to allow async checks
             let isValid = true;
-            inputs.forEach(input => {
-                if (!validateInput(input)) {
+
+            for (let input of inputs) {
+                const result = await validateInputAsync(input);
+                if (!result) {
                     isValid = false;
                 }
-            });
+            }
 
-            if (!isValid) {
-                event.preventDefault();
-                // Scroll to first error
+            if (isValid) {
+                form.submit();
+            } else {
                 const firstError = form.querySelector('.is-invalid');
                 if (firstError) {
                     firstError.focus();
@@ -68,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function validateInput(input) {
+    async function validateInputAsync(input) {
         // Skip validation if input is not required and is empty (unless it has specific rules)
-        if (!input.hasAttribute('required') && input.value.trim() === '' && !input.dataset.rule) {
+        if (!input.hasAttribute('required') && input.value.trim() === '' && !input.dataset.rule && !input.dataset.unique) {
             clearFieldError(input);
             return true;
         }
@@ -80,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Check required
         if (input.hasAttribute('required') && input.value.trim() === '') {
             errorMessage = 'Trường này không được để trống.';
-        } 
+        }
         else if (input.value.trim() !== '') {
             // 2. Check data-rule (e.g. data-rule="email|phone|username")
             if (input.dataset.rule) {
@@ -90,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const result = rules[rule](input.value);
                         if (result !== true) {
                             errorMessage = result;
-                            break; // Stop on first error
+                            break;
                         }
                     }
                 }
@@ -107,6 +110,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = rules.match(input.value, input.dataset.match);
                 if (result !== true) errorMessage = result;
             }
+
+            // 5. Check real-time uniqueness via API
+            if (!errorMessage && input.dataset.unique) {
+                try {
+                    const field = input.dataset.unique;
+                    const value = input.value.trim();
+                    const excludeId = input.dataset.excludeId || '';
+
+                    const url = `/DentalClinicManagementSystem/api/validate?field=${field}&value=${encodeURIComponent(value)}&excludeId=${excludeId}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (data.exists) {
+                        errorMessage = 'Dữ liệu này đã được sử dụng. Vui lòng chọn dữ liệu khác.';
+                        if (field === 'email') errorMessage = 'Email này đã tồn tại trong hệ thống.';
+                        if (field === 'phone') errorMessage = 'Số điện thoại này đã được đăng ký.';
+                        if (field === 'username') errorMessage = 'Tên đăng nhập đã tồn tại.';
+                    }
+                } catch (e) {
+                    console.error("Lỗi khi gọi API validate:", e);
+                }
+            }
         }
 
         if (errorMessage) {
@@ -114,16 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         } else {
             clearFieldError(input);
-            // Optionally add an 'is-valid' class for green borders
             input.classList.add('is-valid');
             return true;
         }
     }
 
+    function validateInput(input) {
+        validateInputAsync(input);
+    }
+
     function showFieldError(inputElement, message) {
         inputElement.classList.remove('is-valid');
         inputElement.classList.add('is-invalid');
-        
+
         let existingError = inputElement.parentElement.querySelector('.field-error');
         if (!existingError) {
             existingError = document.createElement('span');
@@ -144,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputElement.classList.remove('is-invalid');
         inputElement.style.borderColor = 'var(--border)'; // Default border
         inputElement.style.boxShadow = 'none';
-        
+
         const errorElement = inputElement.parentElement.querySelector('.field-error');
         if (errorElement) {
             errorElement.remove();

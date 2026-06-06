@@ -33,21 +33,21 @@
                 <div class="form-group">
                     <label for="username" class="form-label">Tên đăng nhập <span style="color: var(--error);">*</span></label>
                     <input type="text" id="username" name="username" class="form-control" 
-                           value="${user.username}" required minlength="4" maxlength="50" data-rule="username"
+                           value="${user.username}" required minlength="4" maxlength="50" data-rule="username" data-unique="username"
                            placeholder="Nhập tên đăng nhập">
                 </div>
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email <span style="color: var(--error);">*</span></label>
                     <input type="email" id="email" name="email" class="form-control" 
-                           value="${user.email}" required data-rule="email" maxlength="150"
+                           value="${user.email}" required data-rule="email" maxlength="150" data-unique="email"
                            placeholder="Nhập địa chỉ email hợp lệ">
                 </div>
 
                 <div class="form-group">
                     <label for="phoneNumber" class="form-label">Số điện thoại <span style="color: var(--error);">*</span></label>
                     <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" 
-                           value="${user.phoneNumber}" required data-rule="phone"
+                           value="${user.phoneNumber}" required data-rule="phone" data-unique="phone"
                            placeholder="Nhập số điện thoại (10-11 số)">
                 </div>
 

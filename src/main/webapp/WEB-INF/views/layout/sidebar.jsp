@@ -18,7 +18,7 @@
         <ul class="nav-list">
             <!-- Chung cho mọi Role: Tổng quan Dashboard -->
             <li class="nav-item">
-                <a href="${sessionScope.loggedUser.roleName == 'Customer' ? pageContext.request.contextPath.concat('/home') : pageContext.request.contextPath.concat('/dashboard')}" class="nav-link active">
+                <a href="${sessionScope.loggedUser.roleName == 'Customer' ? pageContext.request.contextPath.concat('/home') : pageContext.request.contextPath.concat('/dashboard')}" class="nav-link ${currentPage == 'dashboard' ? 'active' : ''}">
                     <i class="fa-solid fa-house nav-icon"></i>
                     <span class="nav-text">Trang chủ</span>
                 </a>
@@ -28,7 +28,7 @@
             <c:if test="${sessionScope.loggedUser.roleName == 'Admin'}">
                 <li class="nav-section">Quản Trị Hệ Thống</li>
                 <li class="nav-item">
-                    <a href="${pageContext.request.contextPath}/admin/employees" class="nav-link">
+                    <a href="${pageContext.request.contextPath}/employees" class="nav-link ${currentPage == 'employees' ? 'active' : ''}">
                         <i class="fa-solid fa-users-gear nav-icon"></i>
                         <span class="nav-text">Nhân viên & Phân quyền</span>
                     </a>

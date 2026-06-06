@@ -25,7 +25,7 @@
         </div>
     </c:if>
 
-    <form action="${pageContext.request.contextPath}/employees/${empty employee ? 'create' : 'update'}" method="POST" id="employeeForm">
+    <form action="${pageContext.request.contextPath}/employees/${empty employee ? 'create' : 'update'}" method="POST" id="employeeForm" class="validate-form">
         <c:if test="${not empty employee}">
             <input type="hidden" name="id" value="${employee.userId}">
         </c:if>
@@ -35,17 +35,17 @@
             <div>
                 <div class="form-group">
                     <label class="form-label" for="username">Tên đăng nhập <span style="color: red;">*</span></label>
-                    <input type="text" class="form-control" id="username" name="username" value="${employee.username}" required ${not empty employee ? 'readonly style="background-color: #f1f5f9; cursor: not-allowed;"' : ''}>
+                    <input type="text" class="form-control" id="username" name="username" value="${employee.username}" required minlength="4" maxlength="50" data-rule="username" data-unique="username" data-exclude-id="${employee.userId}" placeholder="Nhập tên đăng nhập" ${not empty employee ? 'readonly style="background-color: #f1f5f9; cursor: not-allowed;"' : ''}>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="email">Email <span style="color: red;">*</span></label>
-                    <input type="email" class="form-control" id="email" name="email" value="${employee.email}" required ${not empty employee ? 'readonly style="background-color: #f1f5f9; cursor: not-allowed;"' : ''}>
+                    <input type="email" class="form-control" id="email" name="email" value="${employee.email}" required data-rule="email" maxlength="150" data-unique="email" data-exclude-id="${employee.userId}" placeholder="Nhập địa chỉ email hợp lệ" ${not empty employee ? 'readonly style="background-color: #f1f5f9; cursor: not-allowed;"' : ''}>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="password">Mật khẩu ${empty employee ? '<span style="color: red;">*</span>' : '<span style="font-size:0.85rem; color:var(--text-secondary)">(Để trống nếu không muốn đổi)</span>'}</label>
-                    <input type="password" class="form-control" id="password" name="password" ${empty employee ? 'required' : ''}>
+                    <input type="password" class="form-control" id="password" name="password" minlength="6" placeholder="Mật khẩu ít nhất 6 ký tự" ${empty employee ? 'required' : ''}>
                 </div>
             </div>
 
@@ -53,12 +53,12 @@
             <div>
                 <div class="form-group">
                     <label class="form-label" for="fullName">Họ và tên <span style="color: red;">*</span></label>
-                    <input type="text" class="form-control" id="fullName" name="fullName" value="${employee.fullName}" required>
+                    <input type="text" class="form-control" id="fullName" name="fullName" value="${employee.fullName}" required minlength="3" maxlength="150" placeholder="Nhập họ và tên">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="phoneNumber">Số điện thoại <span style="color: red;">*</span></label>
-                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="${employee.phoneNumber}" required>
+                    <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" value="${employee.phoneNumber}" required data-rule="phone" data-unique="phone" data-exclude-id="${employee.userId}" placeholder="Nhập số điện thoại (10-11 số)">
                 </div>
 
                 <div class="form-group">
