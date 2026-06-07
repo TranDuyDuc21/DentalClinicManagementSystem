@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InvoiceDAO extends DBContext {
+
     public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr) {
         List<Invoice> list = new ArrayList<>();
         String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName " +
@@ -59,6 +60,24 @@ public class InvoiceDAO extends DBContext {
         return list;
     }
 
+    public Invoice getInvoiceById(int id) {
+        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName " +
+                     "FROM invoices i " +
+                     "JOIN patients p ON i.patient_id = p.patient_id " +
+                     "LEFT JOIN users u ON i.created_by = u.user_id " +
+                     "WHERE i.invoice_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapInvoice(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("getInvoiceById error: " + e.getMessage());
+        }
+        return null;
+    }
 
     public int createInvoice(Invoice invoice, List<InvoiceItem> items) {
         String insertInvoice = "INSERT INTO invoices (invoice_code, visit_id, patient_id, subtotal, discount, total_amount, status, created_by) " +
@@ -117,6 +136,18 @@ public class InvoiceDAO extends DBContext {
             try { connection.setAutoCommit(true); } catch (SQLException ex) {}
         }
         return -1;
+    }
+
+    public boolean updateInvoiceStatus(int invoiceId, String status) {
+        String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, invoiceId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("updateInvoiceStatus error: " + e.getMessage());
+        }
+        return false;
     }
 
     public List<InvoiceItem> getInvoiceItems(int invoiceId) {
