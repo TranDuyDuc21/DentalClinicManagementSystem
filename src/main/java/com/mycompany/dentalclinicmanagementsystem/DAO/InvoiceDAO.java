@@ -8,6 +8,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InvoiceDAO extends DBContext {
+    public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr) {
+        List<Invoice> list = new ArrayList<>();
+        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName " +
+                     "FROM invoices i " +
+                     "JOIN patients p ON i.patient_id = p.patient_id " +
+                     "LEFT JOIN users u ON i.created_by = u.user_id " +
+                     "WHERE 1=1 ";
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND i.status = ? ";
+        }
+        
+        // paymentMethod filtering might need join with payments table or just basic filtering if we simplify.
+        // Actually, we can filter by paymentMethod using EXISTS if needed, but let's stick to status and search first.
+        if (paymentMethod != null && !paymentMethod.isEmpty()) {
+            sql += " AND EXISTS (SELECT 1 FROM payments py WHERE py.invoice_id = i.invoice_id AND py.payment_method = ?) ";
+        }
+
+        if (searchStr != null && !searchStr.isEmpty()) {
+            sql += " AND (i.invoice_code LIKE ? OR p.full_name LIKE ? OR p.phone_number LIKE ?) ";
+        }
+        
+        sql += " ORDER BY i.created_at DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (paymentMethod != null && !paymentMethod.isEmpty()) {
+                ps.setString(paramIndex++, paymentMethod);
+            }
+            if (searchStr != null && !searchStr.isEmpty()) {
+                String likeSearch = "%" + searchStr + "%";
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Invoice inv = mapInvoice(rs);
+                    list.add(inv);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("getAllInvoices error: " + e.getMessage());
+        }
+        return list;
+    }
+
 
     public int createInvoice(Invoice invoice, List<InvoiceItem> items) {
         String insertInvoice = "INSERT INTO invoices (invoice_code, visit_id, patient_id, subtotal, discount, total_amount, status, created_by) " +
