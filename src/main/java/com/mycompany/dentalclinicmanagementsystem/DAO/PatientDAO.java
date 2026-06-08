@@ -114,4 +114,58 @@ public class PatientDAO {
         }
         return patients;
     }
+
+    public Patient getPatientByPhone(String phone) {
+        String sql = "SELECT * FROM patients WHERE phone_number = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Patient p = new Patient();
+                    p.setPatientId(rs.getInt("patient_id"));
+                    p.setPatientCode(rs.getString("patient_code"));
+                    p.setUserId(rs.getObject("user_id") != null ? rs.getInt("user_id") : null);
+                    p.setFullName(rs.getString("full_name"));
+                    p.setDateOfBirth(rs.getDate("date_of_birth"));
+                    p.setGender(rs.getString("gender"));
+                    p.setPhoneNumber(rs.getString("phone_number"));
+                    p.setEmail(rs.getString("email"));
+                    p.setAddress(rs.getString("address"));
+                    p.setMedicalHistory(rs.getString("medical_history"));
+                    p.setDrugAllergies(rs.getString("drug_allergies"));
+                    p.setCreatedAt(rs.getTimestamp("created_at"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting patient by phone: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updatePatient(Patient patient) {
+        String sql = "UPDATE patients SET full_name = ?, date_of_birth = ?, gender = ?, phone_number = ?, email = ?, address = ?, medical_history = ?, drug_allergies = ? WHERE patient_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, patient.getFullName());
+            ps.setDate(2, patient.getDateOfBirth());
+            ps.setString(3, patient.getGender());
+            ps.setString(4, patient.getPhoneNumber());
+            ps.setString(5, patient.getEmail());
+            ps.setString(6, patient.getAddress());
+            ps.setString(7, patient.getMedicalHistory());
+            ps.setString(8, patient.getDrugAllergies());
+            ps.setInt(9, patient.getPatientId());
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating patient: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

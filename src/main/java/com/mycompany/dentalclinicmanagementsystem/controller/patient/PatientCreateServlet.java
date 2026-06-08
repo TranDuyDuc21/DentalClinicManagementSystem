@@ -69,18 +69,34 @@ public class PatientCreateServlet extends HttpServlet {
             patient.setMedicalHistory(medicalHistory);
             patient.setDrugAllergies(drugAllergies);
 
-            // Tự sinh mã bệnh nhân
-            String patientCode = patientDAO.generatePatientCode();
-            patient.setPatientCode(patientCode);
+            String patientIdStr = request.getParameter("patientId");
+            boolean isUpdate = (patientIdStr != null && !patientIdStr.trim().isEmpty());
 
-            boolean success = patientDAO.createPatient(patient);
-
-            if (success) {
-                session.setAttribute("successMessage", "Đã tạo hồ sơ bệnh nhân thành công với mã: " + patientCode);
-                response.sendRedirect(request.getContextPath() + "/patients"); 
+            boolean success;
+            if (isUpdate) {
+                patient.setPatientId(Integer.parseInt(patientIdStr));
+                success = patientDAO.updatePatient(patient);
+                if (success) {
+                    session.setAttribute("successMessage", "Đã cập nhật hồ sơ bệnh nhân thành công.");
+                    response.sendRedirect(request.getContextPath() + "/patients"); 
+                } else {
+                    session.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật hồ sơ. Vui lòng thử lại.");
+                    response.sendRedirect(request.getContextPath() + "/patients/create");
+                }
             } else {
-                session.setAttribute("errorMessage", "Đã xảy ra lỗi khi tạo hồ sơ. Vui lòng thử lại.");
-                response.sendRedirect(request.getContextPath() + "/patients/create");
+                // Tự sinh mã bệnh nhân
+                String patientCode = patientDAO.generatePatientCode();
+                patient.setPatientCode(patientCode);
+
+                success = patientDAO.createPatient(patient);
+
+                if (success) {
+                    session.setAttribute("successMessage", "Đã tạo hồ sơ bệnh nhân thành công với mã: " + patientCode);
+                    response.sendRedirect(request.getContextPath() + "/patients"); 
+                } else {
+                    session.setAttribute("errorMessage", "Đã xảy ra lỗi khi tạo hồ sơ. Vui lòng thử lại.");
+                    response.sendRedirect(request.getContextPath() + "/patients/create");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
