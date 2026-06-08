@@ -33,7 +33,8 @@ public class InvoiceDAO extends DBContext {
         
         sql += " ORDER BY i.created_at DESC";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             int paramIndex = 1;
             if (status != null && !status.isEmpty()) {
                 ps.setString(paramIndex++, status);
@@ -66,7 +67,8 @@ public class InvoiceDAO extends DBContext {
                      "JOIN patients p ON i.patient_id = p.patient_id " +
                      "LEFT JOIN users u ON i.created_by = u.user_id " +
                      "WHERE i.invoice_id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -85,62 +87,66 @@ public class InvoiceDAO extends DBContext {
         String insertItem = "INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total) " +
                             "VALUES (?, ?, ?, ?, ?, ?)";
                             
-        try {
+        try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
-            
-            int newInvoiceId = -1;
-            try (PreparedStatement psInv = connection.prepareStatement(insertInvoice, Statement.RETURN_GENERATED_KEYS)) {
-                psInv.setString(1, invoice.getInvoiceCode());
-                psInv.setInt(2, invoice.getVisitId());
-                psInv.setInt(3, invoice.getPatientId());
-                psInv.setBigDecimal(4, invoice.getSubtotal());
-                psInv.setBigDecimal(5, invoice.getDiscount());
-                psInv.setBigDecimal(6, invoice.getTotalAmount());
-                psInv.setString(7, invoice.getStatus());
-                psInv.setInt(8, invoice.getCreatedBy());
-                psInv.executeUpdate();
-                
-                try (ResultSet rs = psInv.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        newInvoiceId = rs.getInt(1);
-                    }
-                }
-            }
-            
-            if (newInvoiceId != -1) {
-                try (PreparedStatement psItem = connection.prepareStatement(insertItem)) {
-                    for (InvoiceItem item : items) {
-                        psItem.setInt(1, newInvoiceId);
-                        if (item.getServiceId() != null) {
-                            psItem.setInt(2, item.getServiceId());
-                        } else {
-                            psItem.setNull(2, java.sql.Types.INTEGER);
+            try {
+                int newInvoiceId = -1;
+                try (PreparedStatement psInv = connection.prepareStatement(insertInvoice, Statement.RETURN_GENERATED_KEYS)) {
+                    psInv.setString(1, invoice.getInvoiceCode());
+                    psInv.setInt(2, invoice.getVisitId());
+                    psInv.setInt(3, invoice.getPatientId());
+                    psInv.setBigDecimal(4, invoice.getSubtotal());
+                    psInv.setBigDecimal(5, invoice.getDiscount());
+                    psInv.setBigDecimal(6, invoice.getTotalAmount());
+                    psInv.setString(7, invoice.getStatus());
+                    psInv.setInt(8, invoice.getCreatedBy());
+                    psInv.executeUpdate();
+                    
+                    try (ResultSet rs = psInv.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            newInvoiceId = rs.getInt(1);
                         }
-                        psItem.setString(3, item.getDescription());
-                        psItem.setInt(4, item.getQuantity());
-                        psItem.setBigDecimal(5, item.getUnitPrice());
-                        psItem.setBigDecimal(6, item.getLineTotal());
-                        psItem.addBatch();
                     }
-                    psItem.executeBatch();
                 }
-                connection.commit();
-                return newInvoiceId;
-            } else {
-                connection.rollback();
+                
+                if (newInvoiceId != -1) {
+                    try (PreparedStatement psItem = connection.prepareStatement(insertItem)) {
+                        for (InvoiceItem item : items) {
+                            psItem.setInt(1, newInvoiceId);
+                            if (item.getServiceId() != null) {
+                                psItem.setInt(2, item.getServiceId());
+                            } else {
+                                psItem.setNull(2, java.sql.Types.INTEGER);
+                            }
+                            psItem.setString(3, item.getDescription());
+                            psItem.setInt(4, item.getQuantity());
+                            psItem.setBigDecimal(5, item.getUnitPrice());
+                            psItem.setBigDecimal(6, item.getLineTotal());
+                            psItem.addBatch();
+                        }
+                        psItem.executeBatch();
+                    }
+                    connection.commit();
+                    return newInvoiceId;
+                } else {
+                    connection.rollback();
+                }
+            } catch (SQLException e) {
+                try { connection.rollback(); } catch (SQLException ex) {}
+                System.out.println("createInvoice error: " + e.getMessage());
+            } finally {
+                try { connection.setAutoCommit(true); } catch (SQLException ex) {}
             }
         } catch (SQLException e) {
-            try { connection.rollback(); } catch (SQLException ex) {}
-            System.out.println("createInvoice error: " + e.getMessage());
-        } finally {
-            try { connection.setAutoCommit(true); } catch (SQLException ex) {}
+            System.out.println("Database connection error: " + e.getMessage());
         }
         return -1;
     }
 
     public boolean updateInvoiceStatus(int invoiceId, String status) {
         String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, invoiceId);
             return ps.executeUpdate() > 0;
@@ -156,7 +162,8 @@ public class InvoiceDAO extends DBContext {
                      "FROM invoice_items ii " +
                      "LEFT JOIN services s ON ii.service_id = s.service_id " +
                      "WHERE ii.invoice_id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, invoiceId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -185,7 +192,8 @@ public class InvoiceDAO extends DBContext {
                      "LEFT JOIN users u ON p.recorded_by = u.user_id " +
                      "WHERE p.invoice_id = ? " +
                      "ORDER BY p.paid_at DESC";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, invoiceId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -210,40 +218,44 @@ public class InvoiceDAO extends DBContext {
     public boolean addPayment(Payment payment) {
         String sql = "INSERT INTO payments (invoice_id, amount, payment_method, transaction_ref, recorded_by) " +
                      "VALUES (?, ?, ?, ?, ?)";
-        try {
+        try (Connection connection = DBContext.getConnection()) {
             connection.setAutoCommit(false);
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, payment.getInvoiceId());
-                ps.setBigDecimal(2, payment.getAmount());
-                ps.setString(3, payment.getPaymentMethod());
-                ps.setString(4, payment.getTransactionRef());
-                ps.setInt(5, payment.getRecordedBy());
-                int rows = ps.executeUpdate();
-                
-                if (rows > 0) {
-                    // check if total paid >= invoice total amount to update status to Paid
-                    String sumSql = "SELECT SUM(amount) FROM payments WHERE invoice_id = ?";
-                    try (PreparedStatement psSum = connection.prepareStatement(sumSql)) {
-                        psSum.setInt(1, payment.getInvoiceId());
-                        try (ResultSet rsSum = psSum.executeQuery()) {
-                            if (rsSum.next()) {
-                                java.math.BigDecimal totalPaid = rsSum.getBigDecimal(1);
-                                Invoice inv = getInvoiceById(payment.getInvoiceId());
-                                if (inv != null && totalPaid != null && totalPaid.compareTo(inv.getTotalAmount()) >= 0) {
-                                    updateInvoiceStatus(payment.getInvoiceId(), "Paid");
+            try {
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, payment.getInvoiceId());
+                    ps.setBigDecimal(2, payment.getAmount());
+                    ps.setString(3, payment.getPaymentMethod());
+                    ps.setString(4, payment.getTransactionRef());
+                    ps.setInt(5, payment.getRecordedBy());
+                    int rows = ps.executeUpdate();
+                    
+                    if (rows > 0) {
+                        // check if total paid >= invoice total amount to update status to Paid
+                        String sumSql = "SELECT SUM(amount) FROM payments WHERE invoice_id = ?";
+                        try (PreparedStatement psSum = connection.prepareStatement(sumSql)) {
+                            psSum.setInt(1, payment.getInvoiceId());
+                            try (ResultSet rsSum = psSum.executeQuery()) {
+                                if (rsSum.next()) {
+                                    java.math.BigDecimal totalPaid = rsSum.getBigDecimal(1);
+                                    Invoice inv = getInvoiceById(payment.getInvoiceId());
+                                    if (inv != null && totalPaid != null && totalPaid.compareTo(inv.getTotalAmount()) >= 0) {
+                                        updateInvoiceStatus(payment.getInvoiceId(), "Paid");
+                                    }
                                 }
                             }
                         }
                     }
+                    connection.commit();
+                    return rows > 0;
                 }
-                connection.commit();
-                return rows > 0;
+            } catch (SQLException e) {
+                try { connection.rollback(); } catch (SQLException ex) {}
+                System.out.println("addPayment error: " + e.getMessage());
+            } finally {
+                try { connection.setAutoCommit(true); } catch (SQLException ex) {}
             }
         } catch (SQLException e) {
-            try { connection.rollback(); } catch (SQLException ex) {}
-            System.out.println("addPayment error: " + e.getMessage());
-        } finally {
-            try { connection.setAutoCommit(true); } catch (SQLException ex) {}
+            System.out.println("Database connection error: " + e.getMessage());
         }
         return false;
     }
