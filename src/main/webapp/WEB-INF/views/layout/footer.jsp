@@ -12,6 +12,7 @@
     </div> <!-- End dashboard-main -->
 </c:if>
 
+    <jsp:include page="/WEB-INF/views/components/confirm-modal.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/validation.js"></script>
 </body>
 </html>
