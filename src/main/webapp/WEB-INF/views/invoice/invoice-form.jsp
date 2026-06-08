@@ -1,131 +1,126 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>${not empty invoice ? 'Update' : 'Create'} Invoice</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .section-title { font-size: 1.1rem; font-weight: 600; color: #495057; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
-    </style>
-</head>
-<body>
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary fw-bold"><i class="fas fa-file-invoice me-2"></i>${not empty invoice ? 'Update' : 'Create New'} Invoice</h2>
-        <a href="invoices" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Back to List</a>
-    </div>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="currentPage" value="invoices" scope="request" />
 
-    <c:if test="${not empty error}">
-        <div class="alert alert-danger">${error}</div>
-    </c:if>
+<jsp:include page="/WEB-INF/views/layout/header.jsp">
+    <jsp:param name="pageTitle" value="${not empty invoice ? 'Cập Nhật' : 'Tạo'} Hóa Đơn" />
+</jsp:include>
 
-    <div class="card">
-        <div class="card-body">
-            <!-- Assuming a separate endpoint for update in the future, currently forwards to create -->
-            <form action="${not empty invoice ? 'invoice-update' : 'invoice-create'}" method="POST" id="invoiceForm">
-                <c:if test="${not empty invoice}">
-                    <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
-                </c:if>
-                
-                <h5 class="section-title">General Information</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Patient ID</label>
-                        <input type="number" class="form-control" name="patientId" required placeholder="Enter Patient ID" value="${invoice.patientId}">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Visit ID</label>
-                        <input type="number" class="form-control" name="visitId" required placeholder="Enter Visit ID" value="${invoice.visitId}">
-                    </div>
-                </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice"></i> ${not empty invoice ? 'Cập Nhật' : 'Tạo Mới'} Hóa Đơn</h2>
+    <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
 
-                <div class="d-flex justify-content-between align-items-center mt-4 mb-3 border-bottom pb-2">
-                    <h5 class="section-title border-bottom-0 mb-0">Services / Items</h5>
-                    <button type="button" class="btn btn-sm btn-primary" onclick="addItem()"><i class="fas fa-plus me-1"></i> Add Item</button>
-                </div>
-                
-                <div class="table-responsive">
-                    <table class="table" id="itemsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Description / Service Name</th>
-                                <th style="width: 150px;">Quantity</th>
-                                <th style="width: 200px;">Unit Price (VND)</th>
-                                <th style="width: 200px;" class="text-end">Line Total (VND)</th>
-                                <th style="width: 80px;" class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="itemsBody">
-                            <c:if test="${not empty items}">
-                                <c:forEach var="item" items="${items}">
-                                    <tr>
-                                        <td><input type="text" class="form-control" name="description[]" required value="${item.description}"></td>
-                                        <td><input type="number" class="form-control qty" name="quantity[]" min="1" onchange="calcTotal()" required value="${item.quantity}"></td>
-                                        <td><input type="number" class="form-control price" name="unitPrice[]" min="0" step="1000" onchange="calcTotal()" required value="${item.unitPrice}"></td>
-                                        <td class="text-end line-total fw-bold align-middle">${item.lineTotal}</td>
-                                        <td class="text-center align-middle">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:if>
-                            <c:if test="${empty items}">
-                                <tr>
-                                    <td><input type="text" class="form-control" name="description[]" required></td>
-                                    <td><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required></td>
-                                    <td><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required></td>
-                                    <td class="text-end line-total fw-bold align-middle">0</td>
-                                    <td class="text-center align-middle">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="fas fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="3" class="text-end text-muted align-middle">Subtotal:</td>
-                                <td class="text-end fw-bold align-middle" id="subtotalDisplay">0</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" class="text-end text-muted align-middle">Discount (VND):</td>
-                                <td><input type="number" class="form-control text-end" name="discount" id="discountInput" value="${not empty invoice ? invoice.discount : 0}" min="0" step="1000" onchange="calcTotal()"></td>
-                                <td></td>
-                            </tr>
-                            <tr class="table-light">
-                                <td colspan="3" class="text-end fw-bold fs-5 align-middle">Total Amount:</td>
-                                <td class="text-end fw-bold text-primary fs-5 align-middle" id="totalDisplay">0</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+<c:if test="${not empty error}">
+    <div class="alert alert-error" style="margin-bottom: 20px;">${error}</div>
+</c:if>
 
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save me-2"></i>${not empty invoice ? 'Update' : 'Create'} Invoice</button>
-                </div>
-            </form>
+<div class="card" style="padding: 20px;">
+    <form action="${pageContext.request.contextPath}/${not empty invoice ? 'invoice-update' : 'invoice-create'}" method="POST" id="invoiceForm">
+        <c:if test="${not empty invoice}">
+            <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
+        </c:if>
+        
+        <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Thông Tin Chung</h5>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">ID Bệnh Nhân</label>
+                <input type="number" class="form-control" name="patientId" required placeholder="Nhập ID Bệnh Nhân" value="${invoice.patientId}" style="width: 100%; box-sizing: border-box;">
+            </div>
+            <div class="form-group">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">ID Lần Khám (Visit ID)</label>
+                <input type="number" class="form-control" name="visitId" required placeholder="Nhập ID Lần Khám" value="${invoice.visitId}" style="width: 100%; box-sizing: border-box;">
+            </div>
         </div>
-    </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Dịch Vụ / Mặt Hàng</h5>
+            <button type="button" class="btn btn-primary" onclick="addItem()" style="width: auto; padding: 6px 12px; font-size: 0.9rem;">
+                <i class="fa-solid fa-plus"></i> Thêm Mặt Hàng
+            </button>
+        </div>
+        
+        <div style="overflow-x: auto; margin-bottom: 30px;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 800px;" id="itemsTable">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-secondary);">Mô Tả / Tên Dịch Vụ</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); width: 120px;">Số Lượng</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); width: 180px;">Đơn Giá (VND)</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); width: 180px; text-align: right;">Thành Tiền (VND)</th>
+                        <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); width: 80px; text-align: center;">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody">
+                    <c:if test="${not empty items}">
+                        <c:forEach var="item" items="${items}">
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required value="${item.description}" style="width: 100%; box-sizing: border-box;"></td>
+                                <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" min="1" onchange="calcTotal()" required value="${item.quantity}" style="width: 100%; box-sizing: border-box;"></td>
+                                <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" min="0" step="1000" onchange="calcTotal()" required value="${item.unitPrice}" style="width: 100%; box-sizing: border-box;"></td>
+                                <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">${item.lineTotal}</td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:if>
+                    <c:if test="${empty items}">
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
+                            <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                            <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                            <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
+                            <td style="padding: 10px; text-align: center;">
+                                <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </c:if>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: right; color: var(--text-secondary);">Tạm tính:</td>
+                        <td style="padding: 12px; text-align: right; font-weight: 600; color: var(--text-primary);" id="subtotalDisplay">0</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: right; color: var(--text-secondary);">Giảm giá (VND):</td>
+                        <td style="padding: 10px;">
+                            <input type="number" class="form-control" name="discount" id="discountInput" value="${not empty invoice ? invoice.discount : 0}" min="0" step="1000" onchange="calcTotal()" style="width: 100%; box-sizing: border-box; text-align: right;">
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td colspan="3" style="padding: 15px 12px; text-align: right; font-weight: 600; font-size: 1.1rem;">Tổng Cộng:</td>
+                        <td style="padding: 15px 12px; text-align: right; font-weight: bold; color: var(--primary); font-size: 1.1rem;" id="totalDisplay">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="submit" class="btn btn-primary" style="width: auto;">
+                <i class="fa-solid fa-save"></i> ${not empty invoice ? 'Cập Nhật' : 'Lưu'} Hóa Đơn
+            </button>
+        </div>
+    </form>
 </div>
 
 <script>
     function addItem() {
         const tbody = document.getElementById('itemsBody');
         const tr = document.createElement('tr');
+        tr.style.borderBottom = "1px solid var(--border-color)";
         tr.innerHTML = `
-            <td><input type="text" class="form-control" name="description[]" required></td>
-            <td><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required></td>
-            <td><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required></td>
-            <td class="text-end line-total fw-bold align-middle">0</td>
-            <td class="text-center align-middle">
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="fas fa-trash"></i></button>
+            <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
+            <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+            <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+            <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
+            <td style="padding: 10px; text-align: center;">
+                <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -161,7 +156,5 @@
         calcTotal();
     };
 </script>
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<jsp:include page="/WEB-INF/views/layout/footer.jsp" />

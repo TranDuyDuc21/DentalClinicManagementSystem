@@ -1,105 +1,101 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Invoice List</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .table th { background-color: #f1f3f5; font-weight: 600; color: #495057; }
-        .badge-Unpaid { background-color: #ffc107; color: #000; }
-        .badge-Paid { background-color: #198754; color: #fff; }
-        .badge-Cancelled { background-color: #dc3545; color: #fff; }
-    </style>
-</head>
-<body>
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i>Invoice Management</h2>
-        <a href="invoice-create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-1"></i> Create Invoice</a>
-    </div>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<c:set var="currentPage" value="invoices" scope="request" />
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form action="invoices" method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label text-muted">Search Patient</label>
-                    <input type="text" name="search" value="${search}" class="form-control" placeholder="Name, Phone, or Invoice Code">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label text-muted">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All Statuses</option>
-                        <option value="Unpaid" ${status == 'Unpaid' ? 'selected' : ''}>Unpaid</option>
-                        <option value="Paid" ${status == 'Paid' ? 'selected' : ''}>Paid</option>
-                        <option value="Cancelled" ${status == 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label text-muted">Payment Method</label>
-                    <select name="paymentMethod" class="form-select">
-                        <option value="">All Methods</option>
-                        <option value="Cash" ${paymentMethod == 'Cash' ? 'selected' : ''}>Cash</option>
-                        <option value="Bank Transfer" ${paymentMethod == 'Bank Transfer' ? 'selected' : ''}>Bank Transfer</option>
-                        <option value="Card" ${paymentMethod == 'Card' ? 'selected' : ''}>Card</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary w-100"><i class="fas fa-filter me-1"></i> Filter</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<jsp:include page="/WEB-INF/views/layout/header.jsp">
+    <jsp:param name="pageTitle" value="Quản Lý Hóa Đơn" />
+</jsp:include>
 
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Invoice Code</th>
-                            <th>Patient Name</th>
-                            <th>Phone</th>
-                            <th>Total Amount</th>
-                            <th>Status</th>
-                            <th>Created At</th>
-                            <th class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="invoice" items="${invoices}">
-                            <tr>
-                                <td class="ps-4 fw-bold text-primary">#${invoice.invoiceCode}</td>
-                                <td>${invoice.patientName}</td>
-                                <td>${invoice.patientPhone}</td>
-                                <td><fmt:formatNumber value="${invoice.totalAmount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                <td>
-                                    <span class="badge badge-${invoice.status}">${invoice.status}</span>
-                                </td>
-                                <td><fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                <td class="text-end pe-4">
-                                    <a href="invoice-detail?id=${invoice.invoiceId}" class="btn btn-sm btn-outline-primary">View</a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        <c:if test="${empty invoices}">
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">No invoices found.</td>
-                            </tr>
-                        </c:if>
-                    </tbody>
-                </table>
-            </div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice-dollar"></i> Quản Lý Hóa Đơn</h2>
+    <a href="${pageContext.request.contextPath}/invoice-create" class="btn btn-primary" style="width: auto;">
+        <i class="fa-solid fa-plus"></i> Tạo Hóa Đơn
+    </a>
+</div>
+
+<t:searchFilter actionUrl="${pageContext.request.contextPath}/invoices" searchPlaceholder="Tìm theo Tên bệnh nhân, SĐT, hoặc Mã HĐ..." searchValue="${param.search}">
+    <div style="width: 200px;">
+        <select name="status" class="form-control" style="width: 100%; box-sizing: border-box;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="Unpaid" ${param.status == 'Unpaid' ? 'selected' : ''}>Chưa thanh toán</option>
+            <option value="Paid" ${param.status == 'Paid' ? 'selected' : ''}>Đã thanh toán</option>
+            <option value="Cancelled" ${param.status == 'Cancelled' ? 'selected' : ''}>Đã hủy</option>
+        </select>
+    </div>
+    <div style="width: 200px;">
+        <select name="paymentMethod" class="form-control" style="width: 100%; box-sizing: border-box;">
+            <option value="">-- Tất cả phương thức --</option>
+            <option value="Cash" ${param.paymentMethod == 'Cash' ? 'selected' : ''}>Tiền mặt</option>
+            <option value="Bank Transfer" ${param.paymentMethod == 'Bank Transfer' ? 'selected' : ''}>Chuyển khoản</option>
+            <option value="Card" ${param.paymentMethod == 'Card' ? 'selected' : ''}>Thẻ</option>
+        </select>
+    </div>
+</t:searchFilter>
+
+<div class="card" style="padding: 20px;">
+    <c:if test="${not empty sessionScope.successMessage}">
+        <div class="alert alert-success" style="margin-bottom: 20px;">
+            ${sessionScope.successMessage}
+            <c:remove var="successMessage" scope="session" />
         </div>
+    </c:if>
+    <c:if test="${not empty sessionScope.errorMessage}">
+        <div class="alert alert-error" style="margin-bottom: 20px;">
+            ${sessionScope.errorMessage}
+            <c:remove var="errorMessage" scope="session" />
+        </div>
+    </c:if>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Mã HĐ</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Tên Bệnh Nhân</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">SĐT</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Tổng Tiền</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Trạng Thái</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Ngày Tạo</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); text-align: left;">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <c:forEach var="invoice" items="${invoices}">
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                        <td style="padding: 12px; font-weight: bold; color: var(--primary);">#${invoice.invoiceCode}</td>
+                        <td style="padding: 12px; font-weight: 500; color: var(--text-primary);">${invoice.patientName}</td>
+                        <td style="padding: 12px;">${invoice.patientPhone}</td>
+                        <td style="padding: 12px;"><fmt:formatNumber value="${invoice.totalAmount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        <td style="padding: 12px;">
+                            <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; 
+                                ${invoice.status == 'Paid' ? 'background: #dcfce7; color: #16a34a;' : 
+                                  (invoice.status == 'Unpaid' ? 'background: #fef3c7; color: #d97706;' : 
+                                  'background: #fee2e2; color: #dc2626;')}">
+                                ${invoice.status == 'Paid' ? 'Đã thanh toán' : (invoice.status == 'Unpaid' ? 'Chưa thanh toán' : 'Đã hủy')}
+                            </span>
+                        </td>
+                        <td style="padding: 12px;"><fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
+                        <td style="padding: 12px; text-align: left;">
+                            <div style="display: flex; gap: 15px; justify-content: flex-start; align-items: center;">
+                                <a href="${pageContext.request.contextPath}/invoice-detail?id=${invoice.invoiceId}" style="color: #6366f1; text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 6px 0;">
+                                    <i class="fa-solid fa-eye"></i> Xem
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+                <c:if test="${empty invoices}">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                            Không có dữ liệu hóa đơn nào.
+                        </td>
+                    </tr>
+                </c:if>
+            </tbody>
+        </table>
     </div>
 </div>
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<jsp:include page="/WEB-INF/views/layout/footer.jsp" />

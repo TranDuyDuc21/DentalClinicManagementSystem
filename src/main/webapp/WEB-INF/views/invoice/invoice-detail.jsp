@@ -1,193 +1,176 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Invoice Detail - #${invoice.invoiceCode}</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .badge-Unpaid { background-color: #ffc107; color: #000; }
-        .badge-Paid { background-color: #198754; color: #fff; }
-        .badge-Cancelled { background-color: #dc3545; color: #fff; }
-        .section-title { font-size: 1.1rem; font-weight: 600; color: #495057; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
-    </style>
-</head>
-<body>
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary fw-bold"><i class="fas fa-file-invoice me-2"></i>Invoice #${invoice.invoiceCode}</h2>
-        <a href="invoices" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Back to List</a>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:set var="currentPage" value="invoices" scope="request" />
+
+<jsp:include page="/WEB-INF/views/layout/header.jsp">
+    <jsp:param name="pageTitle" value="Chi Tiết Hóa Đơn - #${invoice.invoiceCode}" />
+</jsp:include>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice"></i> Chi Tiết Hóa Đơn #${invoice.invoiceCode}</h2>
+    <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<c:if test="${not empty msg}">
+    <div class="alert alert-success" style="margin-bottom: 20px;">
+        ${msg}
+        <c:remove var="msg" scope="session"/>
+    </div>
+</c:if>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
+    <!-- Invoice Info -->
+    <div>
+        <div class="card" style="padding: 20px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <h6 style="color: var(--text-secondary); margin-bottom: 5px;">Tên Bệnh Nhân</h6>
+                    <div style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">${invoice.patientName}</div>
+                    <div style="color: var(--text-secondary); margin-top: 5px;"><i class="fa-solid fa-phone"></i> ${invoice.patientPhone}</div>
+                </div>
+                <div style="text-align: right;">
+                    <h6 style="color: var(--text-secondary); margin-bottom: 5px;">Trạng Thái</h6>
+                    <span style="padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block;
+                        ${invoice.status == 'Paid' ? 'background: #dcfce7; color: #16a34a;' : 
+                          (invoice.status == 'Unpaid' ? 'background: #fef3c7; color: #d97706;' : 
+                          'background: #fee2e2; color: #dc2626;')}">
+                        ${invoice.status == 'Paid' ? 'Đã thanh toán' : (invoice.status == 'Unpaid' ? 'Chưa thanh toán' : 'Đã hủy')}
+                    </span>
+                    <div style="color: var(--text-secondary); margin-top: 5px;"><i class="fa-regular fa-clock"></i> <fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
+                </div>
+            </div>
+
+            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Dịch Vụ / Mặt Hàng</h5>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
+                            <th style="padding: 12px; font-weight: 600; color: var(--text-secondary);">Mô Tả</th>
+                            <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); text-align: center;">SL</th>
+                            <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); text-align: right;">Đơn Giá</th>
+                            <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); text-align: right;">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="item" items="${items}">
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 12px; color: var(--text-primary);">${not empty item.serviceName ? item.serviceName : item.description}</td>
+                                <td style="padding: 12px; text-align: center;">${item.quantity}</td>
+                                <td style="padding: 12px; text-align: right;"><fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                                <td style="padding: 12px; text-align: right; font-weight: 600;"><fmt:formatNumber value="${item.lineTotal}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="padding: 12px; text-align: right; color: var(--text-secondary);">Tạm tính</td>
+                            <td style="padding: 12px; text-align: right;"><fmt:formatNumber value="${invoice.subtotal}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="padding: 12px; text-align: right; color: var(--text-secondary);">Giảm giá</td>
+                            <td style="padding: 12px; text-align: right; color: var(--error);">-<fmt:formatNumber value="${invoice.discount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                            <td colspan="3" style="padding: 15px 12px; text-align: right; font-weight: 600; font-size: 1.1rem;">Tổng Cộng</td>
+                            <td style="padding: 15px 12px; text-align: right; font-weight: bold; color: var(--primary); font-size: 1.1rem;"><fmt:formatNumber value="${invoice.totalAmount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card" style="padding: 20px;">
+            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Lịch Sử Thanh Toán</h5>
+            <c:if test="${empty payments}">
+                <p style="color: var(--text-secondary); margin: 0;">Chưa có giao dịch thanh toán nào.</p>
+            </c:if>
+            <c:if test="${not empty payments}">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
+                                <th style="padding: 12px; font-weight: 600; color: var(--text-secondary);">Ngày</th>
+                                <th style="padding: 12px; font-weight: 600; color: var(--text-secondary);">Phương Thức</th>
+                                <th style="padding: 12px; font-weight: 600; color: var(--text-secondary);">Mã GD</th>
+                                <th style="padding: 12px; font-weight: 600; color: var(--text-secondary); text-align: right;">Số Tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:set var="totalPaid" value="0"/>
+                            <c:forEach var="payment" items="${payments}">
+                                <c:set var="totalPaid" value="${totalPaid + payment.amount}"/>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;"><fmt:formatDate value="${payment.paidAt}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                    <td style="padding: 12px;">${payment.paymentMethod == 'Cash' ? 'Tiền mặt' : (payment.paymentMethod == 'Bank Transfer' ? 'Chuyển khoản' : (payment.paymentMethod == 'Card' ? 'Thẻ' : payment.paymentMethod))}</td>
+                                    <td style="padding: 12px;">${payment.transactionRef}</td>
+                                    <td style="padding: 12px; text-align: right; color: var(--success); font-weight: 600;"><fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" style="padding: 12px; text-align: right;">Tổng Đã Trả:</th>
+                                <th style="padding: 12px; text-align: right; color: var(--success); font-weight: bold;"><fmt:formatNumber value="${totalPaid}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></th>
+                            </tr>
+                            <c:if test="${invoice.totalAmount - totalPaid > 0}">
+                                <tr>
+                                    <th colspan="3" style="padding: 12px; text-align: right; color: var(--error);">Còn Nợ:</th>
+                                    <th style="padding: 12px; text-align: right; color: var(--error); font-weight: bold;"><fmt:formatNumber value="${invoice.totalAmount - totalPaid}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></th>
+                                </tr>
+                            </c:if>
+                        </tfoot>
+                    </table>
+                </div>
+            </c:if>
+        </div>
     </div>
 
-    <c:if test="${not empty msg}">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            ${msg} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        <c:remove var="msg" scope="session"/>
-    </c:if>
+    <!-- Payment Actions -->
+    <div>
+        <div class="card" style="padding: 20px; position: sticky; top: 20px;">
+            <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Ghi Nhận Thanh Toán</h5>
+            <c:if test="${invoice.status == 'Paid'}">
+                <div class="alert alert-success"><i class="fa-solid fa-circle-check"></i> Hóa đơn này đã được thanh toán đủ.</div>
+            </c:if>
+            <c:if test="${invoice.status == 'Cancelled'}">
+                <div class="alert alert-error"><i class="fa-solid fa-circle-xmark"></i> Hóa đơn này đã bị hủy.</div>
+            </c:if>
+            <c:if test="${invoice.status == 'Unpaid'}">
+                <form action="${pageContext.request.contextPath}/invoice-payment" method="POST" style="margin: 0;">
+                    <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
+                    
+                    <c:set var="paidAmount" value="0"/>
+                    <c:forEach var="p" items="${payments}">
+                        <c:set var="paidAmount" value="${paidAmount + p.amount}"/>
+                    </c:forEach>
+                    <c:set var="remaining" value="${invoice.totalAmount - paidAmount}"/>
 
-    <div class="row">
-        <!-- Invoice Info -->
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-sm-6">
-                            <h6 class="text-muted mb-1">Patient Name</h6>
-                            <div class="fw-bold fs-5">${invoice.patientName}</div>
-                            <div class="text-muted"><i class="fas fa-phone me-1"></i> ${invoice.patientPhone}</div>
-                        </div>
-                        <div class="col-sm-6 text-sm-end">
-                            <h6 class="text-muted mb-1">Status</h6>
-                            <span class="badge badge-${invoice.status} fs-6">${invoice.status}</span>
-                            <div class="text-muted mt-2"><i class="far fa-clock me-1"></i> <fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
-                        </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Số Tiền (VND)</label>
+                        <input type="number" class="form-control" name="amount" value="${remaining}" max="${remaining}" step="0.01" required style="width: 100%; box-sizing: border-box;">
                     </div>
-
-                    <h5 class="section-title mt-4">Services / Items</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Description</th>
-                                    <th class="text-center">Qty</th>
-                                    <th class="text-end">Unit Price</th>
-                                    <th class="text-end">Line Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <c:forEach var="item" items="${items}">
-                                    <tr>
-                                        <td>${not empty item.serviceName ? item.serviceName : item.description}</td>
-                                        <td class="text-center">${item.quantity}</td>
-                                        <td class="text-end"><fmt:formatNumber value="${item.unitPrice}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                        <td class="text-end fw-bold"><fmt:formatNumber value="${item.lineTotal}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                    </tr>
-                                </c:forEach>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3" class="text-end text-muted">Subtotal</td>
-                                    <td class="text-end"><fmt:formatNumber value="${invoice.subtotal}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3" class="text-end text-muted">Discount</td>
-                                    <td class="text-end text-danger">-<fmt:formatNumber value="${invoice.discount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                </tr>
-                                <tr class="table-light">
-                                    <td colspan="3" class="text-end fw-bold fs-5">Total Amount</td>
-                                    <td class="text-end fw-bold text-primary fs-5"><fmt:formatNumber value="${invoice.totalAmount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Phương Thức</label>
+                        <select class="form-control" name="paymentMethod" required style="width: 100%; box-sizing: border-box;">
+                            <option value="Cash">Tiền mặt</option>
+                            <option value="Bank Transfer">Chuyển khoản</option>
+                            <option value="Card">Thẻ</option>
+                        </select>
                     </div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="section-title">Payment History</h5>
-                    <c:if test="${empty payments}">
-                        <p class="text-muted mb-0">No payments recorded yet.</p>
-                    </c:if>
-                    <c:if test="${not empty payments}">
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Method</th>
-                                        <th>Transaction Ref</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <c:set var="totalPaid" value="0"/>
-                                    <c:forEach var="payment" items="${payments}">
-                                        <c:set var="totalPaid" value="${totalPaid + payment.amount}"/>
-                                        <tr>
-                                            <td><fmt:formatDate value="${payment.paidAt}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                            <td>${payment.paymentMethod}</td>
-                                            <td>${payment.transactionRef}</td>
-                                            <td class="text-success fw-bold"><fmt:formatNumber value="${payment.amount}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></td>
-                                        </tr>
-                                    </c:forEach>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="3" class="text-end">Total Paid:</th>
-                                        <th class="text-success fs-6"><fmt:formatNumber value="${totalPaid}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></th>
-                                    </tr>
-                                    <c:if test="${invoice.totalAmount - totalPaid > 0}">
-                                        <tr>
-                                            <th colspan="3" class="text-end text-danger">Remaining Balance:</th>
-                                            <th class="text-danger fs-6"><fmt:formatNumber value="${invoice.totalAmount - totalPaid}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></th>
-                                        </tr>
-                                    </c:if>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </c:if>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Actions -->
-        <div class="col-md-4">
-            <div class="card sticky-top" style="top: 2rem;">
-                <div class="card-body">
-                    <h5 class="section-title">Record Payment</h5>
-                    <c:if test="${invoice.status == 'Paid'}">
-                        <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> This invoice has been fully paid.</div>
-                    </c:if>
-                    <c:if test="${invoice.status == 'Cancelled'}">
-                        <div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i> This invoice is cancelled.</div>
-                    </c:if>
-                    <c:if test="${invoice.status == 'Unpaid'}">
-                        <form action="invoice-payment" method="POST">
-                            <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
-                            
-                            <!-- Calculate remaining -->
-                            <c:set var="paidAmount" value="0"/>
-                            <c:forEach var="p" items="${payments}">
-                                <c:set var="paidAmount" value="${paidAmount + p.amount}"/>
-                            </c:forEach>
-                            <c:set var="remaining" value="${invoice.totalAmount - paidAmount}"/>
-
-                            <div class="mb-3">
-                                <label class="form-label">Payment Amount</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" name="amount" value="${remaining}" max="${remaining}" step="0.01" required>
-                                    <span class="input-group-text">VND</span>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Payment Method</label>
-                                <select class="form-select" name="paymentMethod" required>
-                                    <option value="Cash">Cash</option>
-                                    <option value="Bank Transfer">Bank Transfer</option>
-                                    <option value="Card">Card</option>
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label">Transaction Ref (Optional)</label>
-                                <input type="text" class="form-control" name="transactionRef" placeholder="e.g. TXN123456">
-                            </div>
-                            <button type="submit" class="btn btn-success w-100"><i class="fas fa-money-bill-wave me-2"></i>Submit Payment</button>
-                        </form>
-                    </c:if>
-                </div>
-            </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Mã GD (Tuỳ chọn)</label>
+                        <input type="text" class="form-control" name="transactionRef" placeholder="VD: TXN123456" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fa-solid fa-money-bill-wave"></i> Thanh Toán
+                    </button>
+                </form>
+            </c:if>
         </div>
     </div>
 </div>
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
