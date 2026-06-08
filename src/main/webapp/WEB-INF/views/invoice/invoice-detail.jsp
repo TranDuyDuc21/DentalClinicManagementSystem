@@ -150,7 +150,7 @@
 
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Số Tiền (VND)</label>
-                        <input type="number" class="form-control" name="amount" value="${remaining}" max="${remaining}" step="0.01" required style="width: 100%; box-sizing: border-box;">
+                        <input type="number" class="form-control" name="amount" value="${remaining}" step="1000" readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;">
                     </div>
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Phương Thức</label>

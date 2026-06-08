@@ -10,9 +10,6 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice-dollar"></i> Quản Lý Hóa Đơn</h2>
-    <a href="${pageContext.request.contextPath}/invoice-create" class="btn btn-primary" style="width: auto;">
-        <i class="fa-solid fa-plus"></i> Tạo Hóa Đơn
-    </a>
 </div>
 
 <t:searchFilter actionUrl="${pageContext.request.contextPath}/invoices" searchPlaceholder="Tìm theo Tên bệnh nhân, SĐT, hoặc Mã HĐ..." searchValue="${param.search}">
@@ -57,6 +54,7 @@
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">SĐT</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Tổng Tiền</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Trạng Thái</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Phương Thức TT</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Ngày Tạo</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); text-align: left;">Hành Động</th>
                 </tr>
@@ -76,6 +74,9 @@
                                 ${invoice.status == 'Paid' ? 'Đã thanh toán' : (invoice.status == 'Unpaid' ? 'Chưa thanh toán' : 'Đã hủy')}
                             </span>
                         </td>
+                        <td style="padding: 12px; color: var(--text-secondary); font-size: 0.95rem;">
+                            ${not empty invoice.paymentMethods ? invoice.paymentMethods.replace('Cash', 'Tiền mặt').replace('Bank Transfer', 'Chuyển khoản').replace('Card', 'Thẻ') : '-'}
+                        </td>
                         <td style="padding: 12px;"><fmt:formatDate value="${invoice.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>
                         <td style="padding: 12px; text-align: left;">
                             <div style="display: flex; gap: 15px; justify-content: flex-start; align-items: center;">
@@ -88,7 +89,7 @@
                 </c:forEach>
                 <c:if test="${empty invoices}">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                        <td colspan="8" style="text-align: center; padding: 30px; color: var(--text-secondary);">
                             Không có dữ liệu hóa đơn nào.
                         </td>
                     </tr>
