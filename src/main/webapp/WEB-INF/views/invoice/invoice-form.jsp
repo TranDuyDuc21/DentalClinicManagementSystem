@@ -26,12 +26,14 @@
         <h5 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Thông Tin Chung</h5>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
             <div class="form-group">
-                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">ID Bệnh Nhân</label>
-                <input type="number" class="form-control" name="patientId" required placeholder="Nhập ID Bệnh Nhân" value="${invoice.patientId}" style="width: 100%; box-sizing: border-box;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Bệnh Nhân</label>
+                <input type="hidden" name="patientId" value="${not empty invoice ? invoice.patientId : patientId}">
+                <input type="text" class="form-control" readonly value="${not empty invoice ? invoice.patientName : (not empty patientName ? patientName : '')}" placeholder="Tên Bệnh Nhân" style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;">
             </div>
             <div class="form-group">
-                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">ID Lần Khám (Visit ID)</label>
-                <input type="number" class="form-control" name="visitId" required placeholder="Nhập ID Lần Khám" value="${invoice.visitId}" style="width: 100%; box-sizing: border-box;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Mã Lần Khám (Visit ID)</label>
+                <input type="hidden" name="visitId" value="${not empty invoice ? invoice.visitId : visitId}">
+                <input type="text" class="form-control" readonly value="${not empty invoice ? invoice.visitId : (not empty visitId ? visitId : '')}" placeholder="ID Lần Khám" style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;">
             </div>
         </div>
 
@@ -68,15 +70,32 @@
                         </c:forEach>
                     </c:if>
                     <c:if test="${empty items}">
-                        <tr style="border-bottom: 1px solid var(--border-color);">
-                            <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
-                            <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
-                            <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
-                            <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
-                            <td style="padding: 10px; text-align: center;">
-                                <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
+                        <c:choose>
+                            <c:when test="${not empty defaultItems}">
+                                <c:forEach var="item" items="${defaultItems}">
+                                    <tr style="border-bottom: 1px solid var(--border-color);">
+                                        <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required value="${item.description}" style="width: 100%; box-sizing: border-box;"></td>
+                                        <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="${item.quantity}" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                        <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="${item.unitPrice}" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                        <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">${item.lineTotal}</td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
+                                    <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                    <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                    <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
+                                    <td style="padding: 10px; text-align: center;">
+                                        <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </c:otherwise>
+                        </c:choose>
                     </c:if>
                 </tbody>
                 <tfoot>

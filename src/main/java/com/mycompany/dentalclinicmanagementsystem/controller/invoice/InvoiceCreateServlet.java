@@ -19,8 +19,87 @@ public class InvoiceCreateServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Normally we'd load active visits/patients to display in the dropdown here
-        // For simplicity, we just forward to the form
+        String visitIdParam = request.getParameter("visitId");
+        if (visitIdParam != null && !visitIdParam.isEmpty()) {
+            try {
+                int visitId = Integer.parseInt(visitIdParam);
+                String sql = "SELECT v.visit_id, p.patient_id, p.full_name as patientName, a.service_id, s.service_name, s.listed_price " +
+                             "FROM visits v " +
+                             "JOIN patients p ON v.patient_id = p.patient_id " +
+                             "JOIN appointments a ON v.appointment_id = a.appointment_id " +
+                             "LEFT JOIN services s ON a.service_id = s.service_id " +
+                             "WHERE v.visit_id = ?";
+                try (java.sql.Connection conn = com.mycompany.dentalclinicmanagementsystem.dao.DBContext.getConnection();
+                     java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, visitId);
+                    try (java.sql.ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            request.setAttribute("visitId", visitId);
+                            request.setAttribute("patientId", rs.getInt("patient_id"));
+                            request.setAttribute("patientName", rs.getString("patientName"));
+                            
+                            List<InvoiceItem> defaultItems = new ArrayList<>();
+                            
+                            int serviceId = rs.getInt("service_id");
+                            if (!rs.wasNull()) {
+                                InvoiceItem mainItem = new InvoiceItem();
+                                mainItem.setDescription(rs.getString("service_name"));
+                                mainItem.setQuantity(1);
+                                BigDecimal price = rs.getBigDecimal("listed_price");
+                                if (price == null) price = BigDecimal.ZERO;
+                                mainItem.setUnitPrice(price);
+                                mainItem.setLineTotal(price);
+                                defaultItems.add(mainItem);
+                            }
+                            
+                            // Fetch test orders
+                            String sqlTests = "SELECT test_type, cost FROM test_orders WHERE visit_id = ?";
+                            try(java.sql.PreparedStatement psTests = conn.prepareStatement(sqlTests)) {
+                                psTests.setInt(1, visitId);
+                                try(java.sql.ResultSet rsTests = psTests.executeQuery()) {
+                                    while(rsTests.next()) {
+                                        InvoiceItem testItem = new InvoiceItem();
+                                        testItem.setDescription("Xét nghiệm: " + rsTests.getString("test_type"));
+                                        testItem.setQuantity(1);
+                                        BigDecimal testCost = rsTests.getBigDecimal("cost");
+                                        if (testCost == null) testCost = BigDecimal.ZERO;
+                                        testItem.setUnitPrice(testCost);
+                                        testItem.setLineTotal(testCost);
+                                        defaultItems.add(testItem);
+                                    }
+                                }
+                            }
+                            
+                            // Fetch treatment steps
+                            String sqlSteps = "SELECT ts.description, ts.estimated_cost FROM treatment_steps ts " +
+                                              "JOIN treatment_plans tp ON ts.plan_id = tp.plan_id " +
+                                              "WHERE tp.visit_id = ?";
+                            try(java.sql.PreparedStatement psSteps = conn.prepareStatement(sqlSteps)) {
+                                psSteps.setInt(1, visitId);
+                                try(java.sql.ResultSet rsSteps = psSteps.executeQuery()) {
+                                    while(rsSteps.next()) {
+                                        InvoiceItem stepItem = new InvoiceItem();
+                                        stepItem.setDescription("Thủ thuật: " + rsSteps.getString("description"));
+                                        stepItem.setQuantity(1);
+                                        BigDecimal cost = rsSteps.getBigDecimal("estimated_cost");
+                                        if (cost == null) cost = BigDecimal.ZERO;
+                                        stepItem.setUnitPrice(cost);
+                                        stepItem.setLineTotal(cost);
+                                        defaultItems.add(stepItem);
+                                    }
+                                }
+                            }
+                            
+                            if (!defaultItems.isEmpty()) {
+                                request.setAttribute("defaultItems", defaultItems);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         request.getRequestDispatcher("/WEB-INF/views/invoice/invoice-form.jsp").forward(request, response);
     }
 

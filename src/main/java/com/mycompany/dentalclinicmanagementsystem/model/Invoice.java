@@ -19,6 +19,7 @@ public class Invoice {
     private String patientName;
     private String patientPhone;
     private String createdByName;
+    private String paymentMethods;
 
     public Invoice() {
     }
@@ -125,5 +126,13 @@ public class Invoice {
 
     public void setCreatedByName(String createdByName) {
         this.createdByName = createdByName;
+    }
+
+    public String getPaymentMethods() {
+        return paymentMethods;
+    }
+
+    public void setPaymentMethods(String paymentMethods) {
+        this.paymentMethods = paymentMethods;
     }
 }

@@ -272,6 +272,7 @@ CREATE TABLE test_orders (
   doctor_id       INT NOT NULL,
   technician_id   INT,                               -- assigned technician (doctors table)
   test_type       VARCHAR(100) NOT NULL,             -- X-ray, Blood test, CT scan...
+  cost            DECIMAL(12,2) DEFAULT 0,
   priority_note   VARCHAR(255),
   status          ENUM('Ordered','In Progress','Completed') NOT NULL DEFAULT 'Ordered',
   ordered_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -405,8 +406,8 @@ INSERT INTO services (service_name, estimated_minutes, listed_price, description
 INSERT IGNORE INTO doctors (user_id, specialty, license_no) VALUES (3, 'Nha khoa tổng quát', 'NKK-12345');
 
 -- Create an appointment
-INSERT INTO appointments (patient_id, doctor_id, scheduled_datetime, status, booking_source, created_by)
-VALUES (1, 1, '2026-06-07 09:00:00', 'Done', 'Online', 2);
+INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by)
+VALUES (1, 1, 4, '2026-06-07 09:00:00', 'Done', 'Online', 2);
 
 -- Create a visit based on the appointment
 INSERT INTO visits (appointment_id, patient_id, doctor_id, visit_date, symptoms, diagnosis, clinical_notes, is_concluded)
@@ -414,21 +415,25 @@ VALUES (LAST_INSERT_ID(), 1, 1, '2026-06-07 09:30:00', 'Đau răng khôn', 'Sâu
 
 SET @visitId = LAST_INSERT_ID();
 
--- 2. Create an unpaid invoice
-INSERT INTO invoices (invoice_code, visit_id, patient_id, subtotal, discount, total_amount, status, created_by)
-VALUES ('INV-20260607-001', @visitId, 1, 1300000.00, 100000.00, 1200000.00, 'Unpaid', 2);
+-- Add Test Orders and Treatment Steps for Visit 1 so they auto-load
+INSERT INTO test_orders (visit_id, doctor_id, test_type, cost, status)
+VALUES (@visitId, 1, 'Chụp X-Quang Toàn Hàm', 150000.00, 'Ordered');
 
-SET @invId1 = LAST_INSERT_ID();
+INSERT INTO treatment_plans (patient_id, visit_id, title)
+VALUES (1, @visitId, 'Kế hoạch nhổ răng khôn');
 
-INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total)
-VALUES (@invId1, 4, 'Nhổ Răng Khôn (Mọc thẳng)', 1, 1000000.00, 1000000.00);
+SET @planId1 = LAST_INSERT_ID();
 
-INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total)
-VALUES (@invId1, 2, 'Cạo Vôi Răng & Đánh Bóng', 1, 300000.00, 300000.00);
+INSERT INTO treatment_steps (plan_id, description, step_order, status, estimated_cost)
+VALUES (@planId1, 'Vệ sinh khoang miệng và bôi tê', 1, 'Done', 100000.00);
 
+INSERT INTO treatment_steps (plan_id, description, step_order, status, estimated_cost)
+VALUES (@planId1, 'Tiểu phẫu nhổ răng khôn', 2, 'Done', 500000.00);
+
+-- (Invoice 1 has been removed to allow testing Create Invoice functionality)
 -- 3. Create a paid invoice
-INSERT INTO appointments (patient_id, doctor_id, scheduled_datetime, status, booking_source, created_by)
-VALUES (2, 1, '2026-06-05 14:00:00', 'Done', 'Walk-in', 2);
+INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by)
+VALUES (2, 1, 3, '2026-06-05 14:00:00', 'Done', 'Walk-in', 2);
 
 INSERT INTO visits (appointment_id, patient_id, doctor_id, visit_date, symptoms, diagnosis, clinical_notes, is_concluded)
 VALUES (LAST_INSERT_ID(), 2, 1, '2026-06-05 14:30:00', 'Muốn tẩy trắng', 'Răng ố vàng nhẹ', 'Tẩy trắng Laser', TRUE);
@@ -447,23 +452,13 @@ VALUES (@invId2, 3, 'Tẩy Trắng Răng Laser', 1, 2500000.00, 2500000.00);
 INSERT INTO payments (invoice_id, amount, payment_method, transaction_ref, paid_at, recorded_by)
 VALUES (@invId2, 2500000.00, 'Bank Transfer', 'VCB123456789', '2026-06-05 15:30:00', 2);
 
--- 4. Create a partially paid / unpaid invoice
-INSERT INTO appointments (patient_id, doctor_id, scheduled_datetime, status, booking_source, created_by)
-VALUES (3, 1, '2026-06-06 10:00:00', 'Done', 'Phone', 2);
+-- 4. Create an unpaid invoice
+INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by)
+VALUES (3, 1, 6, '2026-06-06 10:00:00', 'Done', 'Phone', 2);
 
 INSERT INTO visits (appointment_id, patient_id, doctor_id, visit_date, symptoms, diagnosis, clinical_notes, is_concluded)
 VALUES (LAST_INSERT_ID(), 3, 1, '2026-06-06 10:15:00', 'Răng sứt mẻ', 'Mẻ răng cửa', 'Bọc sứ', TRUE);
 
 SET @visitId3 = LAST_INSERT_ID();
 
-INSERT INTO invoices (invoice_code, visit_id, patient_id, subtotal, discount, total_amount, status, created_by)
-VALUES ('INV-20260606-003', @visitId3, 3, 5000000.00, 0.00, 5000000.00, 'Unpaid', 2);
-
-SET @invId3 = LAST_INSERT_ID();
-
-INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total)
-VALUES (@invId3, 6, 'Bọc Răng Sứ Cercon', 1, 5000000.00, 5000000.00);
-
--- Add a partial payment
-INSERT INTO payments (invoice_id, amount, payment_method, transaction_ref, paid_at, recorded_by)
-VALUES (@invId3, 2000000.00, 'Cash', NULL, '2026-06-06 11:30:00', 2);
+-- (Invoice 3 has been removed to allow testing Create Invoice functionality)

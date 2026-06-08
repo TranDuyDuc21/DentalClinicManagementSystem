@@ -11,7 +11,8 @@ public class InvoiceDAO extends DBContext {
 
     public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr) {
         List<Invoice> list = new ArrayList<>();
-        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName " +
+        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName, " +
+                     "(SELECT GROUP_CONCAT(DISTINCT py.payment_method SEPARATOR ', ') FROM payments py WHERE py.invoice_id = i.invoice_id) as paymentMethods " +
                      "FROM invoices i " +
                      "JOIN patients p ON i.patient_id = p.patient_id " +
                      "LEFT JOIN users u ON i.created_by = u.user_id " +
@@ -62,7 +63,8 @@ public class InvoiceDAO extends DBContext {
     }
 
     public Invoice getInvoiceById(int id) {
-        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName " +
+        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName, " +
+                     "(SELECT GROUP_CONCAT(DISTINCT py.payment_method SEPARATOR ', ') FROM payments py WHERE py.invoice_id = i.invoice_id) as paymentMethods " +
                      "FROM invoices i " +
                      "JOIN patients p ON i.patient_id = p.patient_id " +
                      "LEFT JOIN users u ON i.created_by = u.user_id " +
@@ -276,6 +278,7 @@ public class InvoiceDAO extends DBContext {
         i.setPatientName(rs.getString("patientName"));
         i.setPatientPhone(rs.getString("patientPhone"));
         i.setCreatedByName(rs.getString("createdByName"));
+        i.setPaymentMethods(rs.getString("paymentMethods"));
         return i;
     }
 }

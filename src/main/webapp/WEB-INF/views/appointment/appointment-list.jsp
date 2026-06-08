@@ -71,14 +71,14 @@
                         <td style="padding: 12px; text-align: left;">
                             <div style="display: flex; gap: 10px; justify-content: flex-start; align-items: center;">
                                 <c:choose>
-                                    <c:when test="${appt.status == 'Done' && not empty appt.visitId && (empty appt.invoiceId || appt.invoiceStatus == 'Unpaid')}">
+                                    <c:when test="${appt.status == 'Done' && not empty appt.visitId && empty appt.invoiceId}">
                                         <a href="${pageContext.request.contextPath}/invoice-create?visitId=${appt.visitId}" 
                                            class="btn btn-primary" 
                                            style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: var(--success); border-color: var(--success);">
                                             <i class="fa-solid fa-file-invoice-dollar"></i> Tạo Hóa Đơn
                                         </a>
                                     </c:when>
-                                    <c:when test="${not empty appt.invoiceId && appt.invoiceStatus != 'Unpaid'}">
+                                    <c:when test="${not empty appt.invoiceId}">
                                         <a href="${pageContext.request.contextPath}/invoice-detail?id=${appt.invoiceId}" 
                                            class="btn btn-outline-secondary" 
                                            style="padding: 6px 12px; font-size: 0.85rem; width: auto; color: var(--text-secondary); border-color: #d1d5db;" title="Đã có hóa đơn">
