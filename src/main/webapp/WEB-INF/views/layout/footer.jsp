@@ -13,6 +13,7 @@
 </c:if>
 
     <jsp:include page="/WEB-INF/views/components/confirm-modal.jsp" />
+    <jsp:include page="/WEB-INF/views/components/alert-modal.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/validation.js"></script>
 </body>
 </html>
