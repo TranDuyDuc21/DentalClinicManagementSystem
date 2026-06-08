@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/admin/services")
+@WebServlet("/services")
 public class ServiceListServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO;

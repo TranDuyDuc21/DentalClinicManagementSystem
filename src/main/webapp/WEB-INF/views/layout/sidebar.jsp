@@ -38,19 +38,19 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/admin/services" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/services" class="nav-link ${currentPage == 'services' ? 'active' : ''}">
                                 <i class="fa-solid fa-list-check nav-icon"></i>
                                 <span class="nav-text">Danh mục dịch vụ</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/admin/chairs" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/chairs" class="nav-link ${currentPage == 'chairs' ? 'active' : ''}">
                                 <i class="fa-solid fa-chair nav-icon"></i>
                                 <span class="nav-text">Quản lý ghế khám</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/admin/reports" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/reports" class="nav-link ${currentPage == 'reports' ? 'active' : ''}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
                                 <span class="nav-text">Báo cáo doanh thu</span>
                             </a>
@@ -61,13 +61,13 @@
                     <c:if test="${sessionScope.loggedUser.roleName == 'Receptionist'}">
                         <li class="nav-section">Lễ Tân & Đón Tiếp</li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/reception/appointments" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/appointments" class="nav-link ${currentPage == 'appointments' ? 'active' : ''}">
                                 <i class="fa-regular fa-calendar-check nav-icon"></i>
                                 <span class="nav-text">Lịch hẹn & Check-in</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/reception/queue" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/queue" class="nav-link ${currentPage == 'queue' ? 'active' : ''}">
                                 <i class="fa-solid fa-users-line nav-icon"></i>
                                 <span class="nav-text">Hàng đợi chờ khám</span>
                             </a>
@@ -80,7 +80,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/invoices" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/invoices" class="nav-link ${currentPage == 'invoices' ? 'active' : ''}">
                                 <i class="fa-solid fa-money-bill-wave nav-icon"></i>
                                 <span class="nav-text">Thanh toán & Hóa đơn</span>
                             </a>
@@ -91,25 +91,25 @@
                     <c:if test="${sessionScope.loggedUser.roleName == 'Doctor'}">
                         <li class="nav-section">Khám & Điều Trị</li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/doctor/schedule" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/schedule" class="nav-link ${currentPage == 'schedule' ? 'active' : ''}">
                                 <i class="fa-regular fa-calendar-days nav-icon"></i>
                                 <span class="nav-text">Lịch làm việc của tôi</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/doctor/examinations" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/examinations" class="nav-link ${currentPage == 'examinations' ? 'active' : ''}">
                                 <i class="fa-solid fa-stethoscope nav-icon"></i>
                                 <span class="nav-text">Danh sách chờ khám</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/doctor/prescriptions" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/prescriptions" class="nav-link ${currentPage == 'prescriptions' ? 'active' : ''}">
                                 <i class="fa-solid fa-prescription-bottle-medical nav-icon"></i>
                                 <span class="nav-text">Kê đơn thuốc</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/doctor/statistics" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/statistics" class="nav-link ${currentPage == 'statistics' ? 'active' : ''}">
                                 <i class="fa-solid fa-chart-column nav-icon"></i>
                                 <span class="nav-text">Thống kê cá nhân</span>
                             </a>
@@ -120,13 +120,13 @@
                     <c:if test="${sessionScope.loggedUser.roleName == 'Technician'}">
                         <li class="nav-section">Cận Lâm Sàng</li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/technician/tests" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/tests" class="nav-link ${currentPage == 'tests' ? 'active' : ''}">
                                 <i class="fa-solid fa-microscope nav-icon"></i>
                                 <span class="nav-text">Lệnh xét nghiệm</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/technician/upload" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/upload" class="nav-link ${currentPage == 'upload' ? 'active' : ''}">
                                 <i class="fa-solid fa-file-arrow-up nav-icon"></i>
                                 <span class="nav-text">Tải kết quả & Hình ảnh</span>
                             </a>
@@ -137,19 +137,19 @@
                     <c:if test="${sessionScope.loggedUser.roleName == 'Customer'}">
                         <li class="nav-section">Khách Hàng</li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/customer/appointments" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/appointments" class="nav-link ${currentPage == 'appointments' ? 'active' : ''}">
                                 <i class="fa-regular fa-calendar-check nav-icon"></i>
                                 <span class="nav-text">Lịch hẹn của tôi</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/customer/records" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/records" class="nav-link ${currentPage == 'records' ? 'active' : ''}">
                                 <i class="fa-solid fa-notes-medical nav-icon"></i>
                                 <span class="nav-text">Hồ sơ bệnh án</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/customer/invoices" class="nav-link">
+                            <a href="${pageContext.request.contextPath}/invoices" class="nav-link ${currentPage == 'invoices' ? 'active' : ''}">
                                 <i class="fa-solid fa-file-invoice nav-icon"></i>
                                 <span class="nav-text">Lịch sử thanh toán</span>
                             </a>
@@ -159,7 +159,7 @@
                     <!-- Chung cho mọi Role: Cài đặt & Đăng xuất -->
                     <li class="nav-section">Tài khoản</li>
                     <li class="nav-item">
-                        <a href="${pageContext.request.contextPath}/profile" class="nav-link">
+                        <a href="${pageContext.request.contextPath}/profile" class="nav-link ${currentPage == 'profile' ? 'active' : ''}">
                             <i class="fa-regular fa-user nav-icon"></i>
                             <span class="nav-text">Hồ sơ cá nhân</span>
                         </a>

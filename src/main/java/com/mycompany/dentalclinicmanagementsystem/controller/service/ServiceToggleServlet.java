@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet("/admin/services/toggle")
+@WebServlet("/services/toggle")
 public class ServiceToggleServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO;
@@ -45,6 +45,6 @@ public class ServiceToggleServlet extends HttpServlet {
             session.setAttribute("errorMessage", "Yêu cầu không hợp lệ.");
         }
         
-        response.sendRedirect(request.getContextPath() + "/admin/services");
+        response.sendRedirect(request.getContextPath() + "/services");
     }
 }

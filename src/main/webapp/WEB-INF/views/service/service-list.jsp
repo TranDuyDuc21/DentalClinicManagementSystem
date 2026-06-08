@@ -13,14 +13,14 @@
         <h2 style="color: var(--text-primary); margin-bottom: 8px;"><i class="fa-solid fa-list-check"></i> Danh Mục Dịch Vụ</h2>
         <p style="color: var(--text-secondary); margin: 0;">Quản lý danh sách các dịch vụ khám và điều trị nha khoa</p>
     </div>
-    <a href="${pageContext.request.contextPath}/admin/services/create" class="btn btn-primary" style="width: auto; display: inline-flex; align-items: center; gap: 8px;">
+    <a href="${pageContext.request.contextPath}/services/create" class="btn btn-primary" style="width: auto; display: inline-flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-plus"></i> Thêm Dịch Vụ Mới
     </a>
 </div>
 
 <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
-<t:searchFilter actionUrl="${pageContext.request.contextPath}/admin/services" searchPlaceholder="Tìm tên dịch vụ..." searchValue="${param.search}">
+<t:searchFilter actionUrl="${pageContext.request.contextPath}/services" searchPlaceholder="Tìm tên dịch vụ..." searchValue="${param.search}">
     <div style="width: 200px;">
         <select name="status" class="form-control" style="width: 100%; box-sizing: border-box;">
             <option value="">-- Tất cả trạng thái --</option>
@@ -80,13 +80,15 @@
                                 </td>
                                 <td style="padding: 12px; text-align: left;">
                                     <div style="display: flex; gap: 15px; justify-content: flex-start; align-items: center;">
-                                        <a href="${pageContext.request.contextPath}/admin/services/update?id=${srv.serviceId}" style="color: #6366f1; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 4px;">
+                                        <a href="${pageContext.request.contextPath}/services/update?id=${srv.serviceId}" style="color: #6366f1; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 4px;">
                                             <i class="fa-solid fa-pen"></i> Sửa
                                         </a>
-                                        <form action="${pageContext.request.contextPath}/admin/services/toggle" method="POST" style="margin: 0;">
+                                        <form action="${pageContext.request.contextPath}/services/toggle" method="POST" style="margin: 0;">
                                             <input type="hidden" name="id" value="${srv.serviceId}">
                                             <input type="hidden" name="status" value="${!srv.active}">
-                                            <button type="submit" class="btn" style="padding: 4px 8px; font-size: 0.85rem; min-width: auto; background-color: ${srv.active ? 'var(--error)' : 'var(--success)'}; color: white; border: none; border-radius: 4px;" onclick="return confirm('Bạn có chắc chắn muốn ${srv.active ? 'tạm ngưng' : 'kích hoạt lại'} dịch vụ này?');">
+                                            <c:set var="actionMsg" value="${srv.active ? 'tạm ngưng' : 'kích hoạt lại'}"/>
+                                            <c:set var="actionType" value="${srv.active ? 'danger' : 'warning'}"/>
+                                            <button type="submit" class="btn" style="padding: 4px 8px; font-size: 0.85rem; min-width: auto; background-color: ${srv.active ? 'var(--error)' : 'var(--success)'}; color: white; border: none; border-radius: 4px;" onclick="event.preventDefault(); var form = this.closest('form'); showConfirmModal('Bạn có chắc chắn muốn ${actionMsg} dịch vụ này?', function() { form.submit(); }, '${actionType}');">
                                                 <i class="fa-solid ${srv.active ? 'fa-ban' : 'fa-check'}"></i> 
                                                 ${srv.active ? 'Ngưng' : 'Mở lại'}
                                             </button>

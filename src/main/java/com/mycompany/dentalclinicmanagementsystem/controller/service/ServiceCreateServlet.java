@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-@WebServlet("/admin/services/create")
+@WebServlet("/services/create")
 public class ServiceCreateServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO;
@@ -69,15 +69,15 @@ public class ServiceCreateServlet extends HttpServlet {
 
             if (serviceDAO.createService(service)) {
                 session.setAttribute("successMessage", "Thêm dịch vụ mới thành công.");
-                response.sendRedirect(request.getContextPath() + "/admin/services");
+                response.sendRedirect(request.getContextPath() + "/services");
             } else {
-                session.setAttribute("errorMessage", "Đã xảy ra lỗi khi thêm dịch vụ.");
-                response.sendRedirect(request.getContextPath() + "/admin/services/create");
+                request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi thêm dịch vụ.");
+                response.sendRedirect(request.getContextPath() + "/services/create");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("errorMessage", "Dữ liệu không hợp lệ.");
-            response.sendRedirect(request.getContextPath() + "/admin/services/create");
+            request.getSession().setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống.");
+            response.sendRedirect(request.getContextPath() + "/services/create");
         }
     }
 }

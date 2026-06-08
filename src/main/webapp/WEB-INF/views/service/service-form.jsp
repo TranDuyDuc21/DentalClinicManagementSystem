@@ -7,7 +7,7 @@
 </jsp:include>
 
 <div style="margin-bottom: 20px;">
-    <a href="${pageContext.request.contextPath}/admin/services" style="color: var(--text-secondary); text-decoration: none;">
+    <a href="${pageContext.request.contextPath}/services" style="color: var(--text-secondary); text-decoration: none;">
         <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
     </a>
 </div>
@@ -20,7 +20,7 @@
 
     <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
-    <form action="${pageContext.request.contextPath}/admin/services/${not empty service ? 'update' : 'create'}" method="POST" class="validate-form">
+    <form action="${pageContext.request.contextPath}/services/${not empty service ? 'update' : 'create'}" method="POST" class="validate-form">
         <c:if test="${not empty service}">
             <input type="hidden" name="serviceId" value="${service.serviceId}">
         </c:if>
@@ -55,7 +55,7 @@
         </div>
 
         <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid var(--border-color); padding-top: 20px;">
-            <a href="${pageContext.request.contextPath}/admin/services" class="btn btn-secondary">Hủy bỏ</a>
+            <a href="${pageContext.request.contextPath}/services" class="btn btn-secondary">Hủy bỏ</a>
             <button type="submit" class="btn btn-primary">
                 <i class="fa-solid fa-floppy-disk"></i> Lưu Dịch Vụ
             </button>

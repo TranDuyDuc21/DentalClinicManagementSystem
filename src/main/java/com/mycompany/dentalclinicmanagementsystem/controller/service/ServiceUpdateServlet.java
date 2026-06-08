@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-@WebServlet("/admin/services/update")
+@WebServlet("/services/update")
 public class ServiceUpdateServlet extends HttpServlet {
 
     private ServiceDAO serviceDAO;
@@ -42,10 +42,10 @@ public class ServiceUpdateServlet extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/views/service/service-form.jsp").forward(request, response);
             } else {
                 session.setAttribute("errorMessage", "Không tìm thấy dịch vụ.");
-                response.sendRedirect(request.getContextPath() + "/admin/services");
+                response.sendRedirect(request.getContextPath() + "/services");
             }
         } catch (NumberFormatException e) {
-            response.sendRedirect(request.getContextPath() + "/admin/services");
+            response.sendRedirect(request.getContextPath() + "/services");
         }
     }
 
@@ -84,18 +84,18 @@ public class ServiceUpdateServlet extends HttpServlet {
 
             if (serviceDAO.updateService(service)) {
                 session.setAttribute("successMessage", "Cập nhật dịch vụ thành công.");
-                response.sendRedirect(request.getContextPath() + "/admin/services");
+                response.sendRedirect(request.getContextPath() + "/services");
             } else {
                 session.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật dịch vụ.");
-                response.sendRedirect(request.getContextPath() + "/admin/services/update?id=" + serviceId);
+                response.sendRedirect(request.getContextPath() + "/services/update?id=" + serviceId);
             }
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("errorMessage", "Dữ liệu không hợp lệ.");
             if (serviceId != -1) {
-                response.sendRedirect(request.getContextPath() + "/admin/services/update?id=" + serviceId);
+                response.sendRedirect(request.getContextPath() + "/services/update?id=" + serviceId);
             } else {
-                response.sendRedirect(request.getContextPath() + "/admin/services");
+                response.sendRedirect(request.getContextPath() + "/services");
             }
         }
     }
