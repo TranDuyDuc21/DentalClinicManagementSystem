@@ -28,8 +28,22 @@
 
             <div class="form-group">
                 <label for="password" class="form-label">Mật khẩu</label>
-                <input type="password" id="password" name="password" class="form-control" 
-                       required placeholder="Nhập mật khẩu">
+                <div style="position: relative;">
+                    <input type="password" id="password" name="password" class="form-control" 
+                           required placeholder="Nhập mật khẩu" style="padding-right: 40px;">
+                    <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
+                        const passwordInput = document.getElementById('password');
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            this.classList.remove('fa-eye');
+                            this.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            this.classList.remove('fa-eye-slash');
+                            this.classList.add('fa-eye');
+                        }
+                    "></i>
+                </div>
             </div>
 
             <div class="form-group mb-3 text-right">

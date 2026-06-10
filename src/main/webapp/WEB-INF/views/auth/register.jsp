@@ -53,16 +53,44 @@
 
                 <div class="form-group">
                     <label for="password" class="form-label">Mật khẩu <span style="color: var(--error);">*</span></label>
-                    <input type="password" id="password" name="password" class="form-control" 
-                           required minlength="6"
-                           placeholder="Mật khẩu ít nhất 6 ký tự">
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" class="form-control" 
+                               required minlength="6"
+                               placeholder="Mật khẩu ít nhất 6 ký tự" style="padding-right: 40px;">
+                        <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
+                            const passwordInput = document.getElementById('password');
+                            if (passwordInput.type === 'password') {
+                                passwordInput.type = 'text';
+                                this.classList.remove('fa-eye');
+                                this.classList.add('fa-eye-slash');
+                            } else {
+                                passwordInput.type = 'password';
+                                this.classList.remove('fa-eye-slash');
+                                this.classList.add('fa-eye');
+                            }
+                        "></i>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label">Xác nhận mật khẩu <span style="color: var(--error);">*</span></label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
-                           required data-match="password"
-                           placeholder="Nhập lại mật khẩu ở trên">
+                    <div style="position: relative;">
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
+                               required data-match="password"
+                               placeholder="Nhập lại mật khẩu ở trên" style="padding-right: 40px;">
+                        <i class="fa-solid fa-eye" id="toggleConfirmPassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
+                            const passwordInput = document.getElementById('confirmPassword');
+                            if (passwordInput.type === 'password') {
+                                passwordInput.type = 'text';
+                                this.classList.remove('fa-eye');
+                                this.classList.add('fa-eye-slash');
+                            } else {
+                                passwordInput.type = 'password';
+                                this.classList.remove('fa-eye-slash');
+                                this.classList.add('fa-eye');
+                            }
+                        "></i>
+                    </div>
                 </div>
             </div>
 
