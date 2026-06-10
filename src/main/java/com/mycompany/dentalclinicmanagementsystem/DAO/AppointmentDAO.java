@@ -7,7 +7,7 @@ import java.util.List;
 
 public class AppointmentDAO extends DBContext {
 
-    public List<Appointment> getAllAppointments(String status, String searchStr) {
+    public List<Appointment> getAllAppointments(String status, String searchStr, int offset, int limit) {
         List<Appointment> list = new ArrayList<>();
         String sql = "SELECT a.*, " +
                      "p.full_name as patientName, p.phone_number as patientPhone, " +
@@ -32,7 +32,8 @@ public class AppointmentDAO extends DBContext {
             sql += " AND (p.full_name LIKE ? OR p.phone_number LIKE ? OR u.full_name LIKE ?) ";
         }
 
-        sql += " ORDER BY a.scheduled_datetime DESC";
+        sql += " ORDER BY a.scheduled_datetime DESC ";
+        sql += " LIMIT ? OFFSET ?";
 
         try (Connection connection = DBContext.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -47,6 +48,8 @@ public class AppointmentDAO extends DBContext {
                 ps.setString(paramIndex++, likeSearch);
                 ps.setString(paramIndex++, likeSearch);
             }
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -82,5 +85,44 @@ public class AppointmentDAO extends DBContext {
             System.out.println("getAllAppointments error: " + e.getMessage());
         }
         return list;
+    }
+
+    public int getTotalAppointments(String status, String searchStr) {
+        String sql = "SELECT COUNT(*) " +
+                     "FROM appointments a " +
+                     "JOIN patients p ON a.patient_id = p.patient_id " +
+                     "JOIN doctors d ON a.doctor_id = d.doctor_id " +
+                     "JOIN users u ON d.user_id = u.user_id " +
+                     "WHERE 1=1 ";
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND a.status = ? ";
+        }
+
+        if (searchStr != null && !searchStr.isEmpty()) {
+            sql += " AND (p.full_name LIKE ? OR p.phone_number LIKE ? OR u.full_name LIKE ?) ";
+        }
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+             
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (searchStr != null && !searchStr.isEmpty()) {
+                String likeSearch = "%" + searchStr + "%";
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println("getTotalAppointments error: " + e.getMessage());
+        }
+        return 0;
     }
 }

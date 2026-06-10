@@ -24,10 +24,27 @@ public class AppointmentListServlet extends HttpServlet {
             status = null;
         }
 
+        String pageStr = request.getParameter("page");
+        int page = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        int limit = 10;
+        int offset = (page - 1) * limit;
+
         AppointmentDAO dao = new AppointmentDAO();
-        List<Appointment> appointments = dao.getAllAppointments(status, searchStr);
+        List<Appointment> appointments = dao.getAllAppointments(status, searchStr, offset, limit);
+        int totalAppointments = dao.getTotalAppointments(status, searchStr);
+        int totalPages = (int) Math.ceil((double) totalAppointments / limit);
 
         request.setAttribute("appointments", appointments);
+        request.setAttribute("pageNumber", page);
+        request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentStatus", status != null ? status : "All");
         
         request.getRequestDispatcher("/WEB-INF/views/appointment/appointment-list.jsp").forward(request, response);

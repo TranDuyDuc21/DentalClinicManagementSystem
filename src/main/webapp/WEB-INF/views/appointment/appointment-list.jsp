@@ -108,6 +108,9 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Phân trang -->
+    <t:pagination activePage="${not empty pageNumber ? pageNumber : (not empty param.page ? param.page : 1)}" totalPages="${totalPages}" urlParams="&search=${param.search}&status=${param.status}" />
 </div>
 
 <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
