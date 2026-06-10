@@ -38,8 +38,26 @@ public class PatientListServlet extends HttpServlet {
         String search = request.getParameter("search");
         String gender = request.getParameter("gender");
 
-        List<Patient> patients = patientDAO.getAllPatients(search, gender);
+        String pageStr = request.getParameter("page");
+        int page = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        int limit = 10;
+        int offset = (page - 1) * limit;
+
+        List<Patient> patients = patientDAO.getAllPatients(search, gender, offset, limit);
+        int totalPatients = patientDAO.getTotalPatients(search, gender);
+        int totalPages = (int) Math.ceil((double) totalPatients / limit);
+
         request.setAttribute("patients", patients);
+        request.setAttribute("pageNumber", page);
+        request.setAttribute("totalPages", totalPages);
         
         request.getRequestDispatcher("/WEB-INF/views/patient/patient-list.jsp").forward(request, response);
     }

@@ -7,8 +7,7 @@
 </jsp:include>
 
 <div style="margin-bottom: 20px;">
-    <!-- Giả định URL danh sách sau này sẽ là /patients -->
-    <a href="${pageContext.request.contextPath}/patients/create" style="color: var(--text-secondary); text-decoration: none;">
+    <a href="${pageContext.request.contextPath}/patients" style="color: var(--text-secondary); text-decoration: none;">
         <i class="fa-solid fa-arrow-left"></i> Quay lại
     </a>
 </div>
@@ -21,15 +20,17 @@
     <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
     <!-- Tìm kiếm số điện thoại trước -->
-    <div id="searchPhoneBox" style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: flex-end;">
-        <div>
-            <label class="form-label" for="searchPhone" style="display: block; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tra cứu số điện thoại trước khi tạo mới <span style="color: var(--error);">*</span></label>
-            <input type="tel" class="form-control" id="searchPhone" placeholder="Nhập số điện thoại bệnh nhân..." style="width: 100%;">
+    <form id="searchPatientForm" class="validate-form" data-ajax="true">
+        <div id="searchPhoneBox" style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: flex-end;">
+            <div>
+                <label class="form-label" for="searchPhone" style="display: block; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tra cứu số điện thoại trước khi tạo mới <span style="color: var(--error);">*</span></label>
+                <input type="tel" class="form-control" id="searchPhone" data-rule="phone" required placeholder="Nhập số điện thoại bệnh nhân..." style="width: 100%;">
+            </div>
+            <button type="submit" class="btn btn-primary" id="btnSearchPhone" style="width: auto; min-width: 150px; white-space: nowrap;">
+                <i class="fa-solid fa-magnifying-glass"></i> Kiểm Tra
+            </button>
         </div>
-        <button type="button" class="btn btn-primary" id="btnSearchPhone" onclick="checkPatientPhone()" style="width: auto; min-width: 150px; white-space: nowrap;">
-            <i class="fa-solid fa-magnifying-glass"></i> Kiểm Tra
-        </button>
-    </div>
+    </form>
 
     <!-- Form chính -->
     <form action="${pageContext.request.contextPath}/patients/create" method="POST" id="patientForm" class="validate-form" style="opacity: 0.5; pointer-events: none; transition: all 0.3s ease;">
@@ -103,26 +104,44 @@
 
 <script>
     // Max date for dateOfBirth is today
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
         const dateInput = document.getElementById('dateOfBirth');
         if (dateInput) {
             const today = new Date().toISOString().split('T')[0];
             dateInput.setAttribute('max', today);
         }
+
+        const searchForm = document.getElementById('searchPatientForm');
+        if (searchForm) {
+            searchForm.addEventListener('validSubmit', () => {
+                checkPatientPhone();
+            });
+        }
     });
 </script>
+
+<!-- Modal chọn bệnh nhân -->
+<div id="patientSelectionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; max-width: 500px; width: 90%;">
+        <h4 style="margin-top: 0; color: var(--primary);">Chọn Hồ Sơ Bệnh Nhân</h4>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Tìm thấy nhiều hồ sơ dùng chung số điện thoại này. Vui lòng chọn:</p>
+        
+        <div id="patientListContainer" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+            <!-- Danh sách bệnh nhân sẽ được render ở đây -->
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+            <button type="button" class="btn btn-secondary" onclick="closePatientModal()">Hủy</button>
+            <button type="button" class="btn btn-primary" onclick="createNewPatientFromModal()"><i class="fa-solid fa-plus"></i> Tạo hồ sơ mới</button>
+        </div>
+    </div>
+</div>
 
 <script>
     function checkPatientPhone() {
         const phoneInput = document.getElementById('searchPhone');
         const phone = phoneInput.value.trim();
         const btn = document.getElementById('btnSearchPhone');
-
-        if(!phone) {
-            showAlertModal('Vui lòng nhập số điện thoại để tra cứu.', 'warning');
-            phoneInput.focus();
-            return;
-        }
 
         // Add loading state
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tra cứu...';
@@ -132,40 +151,19 @@
             .then(res => res.json())
             .then(data => {
                 const form = document.getElementById('patientForm');
-                const submitBtn = document.getElementById('btnSubmitForm');
                 
                 // Unlock form
                 form.style.opacity = '1';
                 form.style.pointerEvents = 'auto';
                 
-                if(data.success && data.patient) {
-                    // Populate data
-                    document.getElementById('patientId').value = data.patient.patientId;
-                    document.getElementById('fullName').value = data.patient.fullName;
-                    document.getElementById('dateOfBirth').value = data.patient.dateOfBirth;
-                    document.getElementById('gender').value = data.patient.gender;
-                    document.getElementById('phoneNumber').value = data.patient.phoneNumber;
-                    document.getElementById('email').value = data.patient.email || '';
-                    document.getElementById('address').value = data.patient.address || '';
-                    document.getElementById('medicalHistory').value = data.patient.medicalHistory || '';
-                    document.getElementById('drugAllergies').value = data.patient.drugAllergies || '';
-                    
-                    // Change submit button
-                    submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Cập Nhật Hồ Sơ';
-                    submitBtn.className = 'btn btn-primary'; 
-                    
-                    // Show notification
-                    showAlertModal('Đã tìm thấy bệnh nhân! Thông tin đã được tự động điền. Bạn có thể cập nhật thông tin nếu cần.', 'success');
+                if(data.success && data.patients && data.patients.length > 0) {
+                    if (data.patients.length === 1) {
+                        loadPatientData(data.patients[0]);
+                    } else {
+                        showPatientSelectionModal(data.patients);
+                    }
                 } else {
-                    // Clear form for new patient
-                    form.reset();
-                    document.getElementById('patientId').value = '';
-                    document.getElementById('phoneNumber').value = phone; // keep the searched phone
-                    
-                    // Change submit button
-                    submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Tạo Hồ Sơ Mới';
-                    submitBtn.className = 'btn btn-primary';
-                    
+                    prepareNewPatientForm(phone);
                     showAlertModal('Không tìm thấy bệnh nhân. Form đã được mở khóa để bạn điền thông tin tạo mới.', 'info');
                 }
             })
@@ -178,6 +176,83 @@
                 btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Kiểm Tra';
                 btn.disabled = false;
             });
+    }
+
+    function loadPatientData(patient) {
+        document.getElementById('patientId').value = patient.patientId;
+        document.getElementById('fullName').value = patient.fullName;
+        document.getElementById('dateOfBirth').value = patient.dateOfBirth;
+        document.getElementById('gender').value = patient.gender;
+        document.getElementById('phoneNumber').value = patient.phoneNumber;
+        document.getElementById('email').value = patient.email || '';
+        document.getElementById('address').value = patient.address || '';
+        document.getElementById('medicalHistory').value = patient.medicalHistory || '';
+        document.getElementById('drugAllergies').value = patient.drugAllergies || '';
+        
+        const submitBtn = document.getElementById('btnSubmitForm');
+        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Cập Nhật Hồ Sơ';
+        submitBtn.className = 'btn btn-primary'; 
+        
+        showAlertModal('Đã tìm thấy bệnh nhân! Thông tin đã được tự động điền.', 'success');
+    }
+
+    function prepareNewPatientForm(phone) {
+        const form = document.getElementById('patientForm');
+        form.reset();
+        document.getElementById('patientId').value = '';
+        document.getElementById('phoneNumber').value = phone; // keep the searched phone
+        
+        const submitBtn = document.getElementById('btnSubmitForm');
+        submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Tạo Hồ Sơ Mới';
+        submitBtn.className = 'btn btn-primary';
+    }
+
+    function showPatientSelectionModal(patients) {
+        const container = document.getElementById('patientListContainer');
+        container.innerHTML = '';
+        
+        patients.forEach((p) => {
+            const div = document.createElement('div');
+            div.style.padding = '10px';
+            div.style.border = '1px solid var(--border-color)';
+            div.style.marginBottom = '10px';
+            div.style.borderRadius = '5px';
+            div.style.cursor = 'pointer';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+            div.onmouseover = () => div.style.backgroundColor = '#f8fafc';
+            div.onmouseout = () => div.style.backgroundColor = 'transparent';
+            
+            div.onclick = () => {
+                loadPatientData(p);
+                closePatientModal();
+            };
+            
+            div.innerHTML = `
+                <div>
+                    <strong>` + p.fullName + `</strong> (` + p.patientCode + `)<br>
+                    <small style="color: var(--text-secondary);">NS: ` + (p.dateOfBirth ? p.dateOfBirth : 'N/A') + ` - ` + (p.gender === 'Male' ? 'Nam' : (p.gender === 'Female' ? 'Nữ' : 'Khác')) + `</small>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.85rem;">Chọn</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+        
+        document.getElementById('patientSelectionModal').style.display = 'flex';
+    }
+
+    function closePatientModal() {
+        document.getElementById('patientSelectionModal').style.display = 'none';
+    }
+
+    function createNewPatientFromModal() {
+        closePatientModal();
+        const phone = document.getElementById('searchPhone').value.trim();
+        prepareNewPatientForm(phone);
+        showAlertModal('Form đã được mở khóa để tạo hồ sơ mới cùng số điện thoại.', 'info');
     }
 </script>
 
