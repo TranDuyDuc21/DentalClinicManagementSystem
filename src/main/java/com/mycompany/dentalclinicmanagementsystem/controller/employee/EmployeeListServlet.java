@@ -44,11 +44,29 @@ public class EmployeeListServlet extends HttpServlet {
         Integer roleId = (roleIdStr != null && !roleIdStr.isEmpty()) ? Integer.parseInt(roleIdStr) : null;
         Boolean status = (statusStr != null && !statusStr.isEmpty()) ? Boolean.parseBoolean(statusStr) : null;
 
-        List<User> employees = userDAO.getEmployees(search, roleId, status);
+        String pageStr = request.getParameter("page");
+        int page = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageStr);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+        int limit = 10;
+        int offset = (page - 1) * limit;
+
+        List<User> employees = userDAO.getEmployees(search, roleId, status, offset, limit);
+        int totalEmployees = userDAO.getTotalEmployees(search, roleId, status);
+        int totalPages = (int) Math.ceil((double) totalEmployees / limit);
+
         List<Role> roles = roleDAO.getAllRolesForEmployees();
         
         request.setAttribute("employees", employees);
         request.setAttribute("roles", roles);
+        request.setAttribute("pageNumber", page);
+        request.setAttribute("totalPages", totalPages);
         
         request.getRequestDispatcher("/WEB-INF/views/employee/employee-list.jsp").forward(request, response);
     }

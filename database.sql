@@ -374,7 +374,17 @@ INSERT INTO users (role_id, username, email, password_hash, full_name, phone_num
   (2, 'reception_test', 'reception@dental.com', '123456', 'Nhân Viên Lễ Tân', '0901234568', TRUE),
   (3, 'doctor_test', 'doctor@dental.com', '123456', 'Bác Sĩ Trưởng Khoa', '0901234569', TRUE),
   (4, 'tech_test', 'tech@dental.com', '123456', 'Kỹ Thuật Viên', '0901234570', TRUE),
-  (5, 'customer_test', 'customer@dental.com', '123456', 'Khách Hàng Vip', '0901234571', TRUE);
+  (5, 'customer_test', 'customer@dental.com', '123456', 'Khách Hàng Vip', '0901234571', TRUE),
+  (2, 'reception_01', 'rec01@dental.com', '123456', 'Lễ Tân 01', '0900000001', TRUE),
+  (2, 'reception_02', 'rec02@dental.com', '123456', 'Lễ Tân 02', '0900000002', TRUE),
+  (3, 'doctor_01', 'doc01@dental.com', '123456', 'Bác Sĩ 01', '0900000003', TRUE),
+  (3, 'doctor_02', 'doc02@dental.com', '123456', 'Bác Sĩ 02', '0900000004', TRUE),
+  (3, 'doctor_03', 'doc03@dental.com', '123456', 'Bác Sĩ 03', '0900000005', TRUE),
+  (3, 'doctor_04', 'doc04@dental.com', '123456', 'Bác Sĩ 04', '0900000006', TRUE),
+  (4, 'tech_01', 'tech01@dental.com', '123456', 'Kỹ Thuật Viên 01', '0900000007', TRUE),
+  (4, 'tech_02', 'tech02@dental.com', '123456', 'Kỹ Thuật Viên 02', '0900000008', TRUE),
+  (4, 'tech_03', 'tech03@dental.com', '123456', 'Kỹ Thuật Viên 03', '0900000009', TRUE),
+  (4, 'tech_04', 'tech04@dental.com', '123456', 'Kỹ Thuật Viên 04', '0900000010', TRUE);
 
 -- =====================================================
 -- SEED PATIENTS

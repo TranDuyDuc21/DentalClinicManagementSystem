@@ -145,7 +145,7 @@ public class UserDAO {
         return employees;
     }
 
-    public List<User> getEmployees(String searchKeyword, Integer roleId, Boolean status) {
+    public List<User> getEmployees(String searchKeyword, Integer roleId, Boolean status, int offset, int limit) {
         List<User> employees = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name != 'Customer'");
         
@@ -171,6 +171,7 @@ public class UserDAO {
         }
         
         sql.append(" ORDER BY u.created_at DESC");
+        sql.append(" LIMIT ? OFFSET ?");
         
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -178,6 +179,8 @@ public class UserDAO {
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));
             }
+            ps.setInt(parameters.size() + 1, limit);
+            ps.setInt(parameters.size() + 2, offset);
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -188,6 +191,43 @@ public class UserDAO {
             e.printStackTrace();
         }
         return employees;
+    }
+
+    public int getTotalEmployees(String searchKeyword, Integer roleId, Boolean status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name != 'Customer'");
+        List<Object> parameters = new ArrayList<>();
+        
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append(" AND (u.full_name LIKE ? OR u.phone_number LIKE ? OR u.email LIKE ? OR u.username LIKE ?)");
+            String keyword = "%" + searchKeyword.trim() + "%";
+            parameters.add(keyword);
+            parameters.add(keyword);
+            parameters.add(keyword);
+            parameters.add(keyword);
+        }
+        
+        if (roleId != null) {
+            sql.append(" AND u.role_id = ?");
+            parameters.add(roleId);
+        }
+        
+        if (status != null) {
+            sql.append(" AND u.is_active = ?");
+            parameters.add(status);
+        }
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < parameters.size(); i++) {
+                ps.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public User getEmployeeById(int id) {
