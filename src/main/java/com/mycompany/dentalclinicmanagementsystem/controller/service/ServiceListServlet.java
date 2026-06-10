@@ -1,6 +1,6 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.service;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.ServiceDAO;
+import com.mycompany.dentalclinicmanagementsystem.service.ClinicService;
 import com.mycompany.dentalclinicmanagementsystem.model.Service;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
@@ -17,11 +17,11 @@ import java.util.List;
 @WebServlet("/services")
 public class ServiceListServlet extends HttpServlet {
 
-    private ServiceDAO serviceDAO;
+    private ClinicService clinicService;
 
     @Override
     public void init() throws ServletException {
-        serviceDAO = new ServiceDAO();
+        clinicService = new ClinicService();
     }
 
     @Override
@@ -48,10 +48,10 @@ public class ServiceListServlet extends HttpServlet {
         }
 
         int offset = (page - 1) * limit;
-        int totalRecords = serviceDAO.getTotalServices(search, status);
+        int totalRecords = clinicService.getTotalServices(search, status);
         int totalPages = (int) Math.ceil((double) totalRecords / limit);
 
-        List<Service> services = serviceDAO.getAllServices(search, status, offset, limit);
+        List<Service> services = clinicService.getAllServices(search, status, offset, limit);
 
         request.setAttribute("services", services);
         request.setAttribute("currentPage", page);

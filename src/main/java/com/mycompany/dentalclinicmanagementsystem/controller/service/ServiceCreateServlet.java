@@ -1,6 +1,6 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.service;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.ServiceDAO;
+import com.mycompany.dentalclinicmanagementsystem.service.ClinicService;
 import com.mycompany.dentalclinicmanagementsystem.model.Service;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
@@ -17,11 +17,11 @@ import java.math.BigDecimal;
 @WebServlet("/services/create")
 public class ServiceCreateServlet extends HttpServlet {
 
-    private ServiceDAO serviceDAO;
+    private ClinicService clinicService;
 
     @Override
     public void init() throws ServletException {
-        serviceDAO = new ServiceDAO();
+        clinicService = new ClinicService();
     }
 
     @Override
@@ -48,6 +48,7 @@ public class ServiceCreateServlet extends HttpServlet {
         }
 
         try {
+            String serviceCode = request.getParameter("serviceCode");
             String serviceName = request.getParameter("serviceName");
             String estimatedMinutesStr = request.getParameter("estimatedMinutes");
             String listedPriceStr = request.getParameter("listedPrice");
@@ -55,6 +56,7 @@ public class ServiceCreateServlet extends HttpServlet {
             boolean isActive = "true".equals(request.getParameter("isActive"));
 
             Service service = new Service();
+            service.setServiceCode(serviceCode);
             service.setServiceName(serviceName);
             if (estimatedMinutesStr != null && !estimatedMinutesStr.trim().isEmpty()) {
                 service.setEstimatedMinutes(Integer.parseInt(estimatedMinutesStr));
@@ -67,16 +69,13 @@ public class ServiceCreateServlet extends HttpServlet {
             service.setDescription(description);
             service.setActive(isActive);
 
-            if (serviceDAO.createService(service)) {
-                session.setAttribute("successMessage", "Thêm dịch vụ mới thành công.");
-                response.sendRedirect(request.getContextPath() + "/services");
-            } else {
-                request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi thêm dịch vụ.");
-                response.sendRedirect(request.getContextPath() + "/services/create");
-            }
+            clinicService.createService(service);
+            session.setAttribute("successMessage", "Thêm dịch vụ mới thành công.");
+            response.sendRedirect(request.getContextPath() + "/services");
+            
         } catch (Exception e) {
             e.printStackTrace();
-            request.getSession().setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống.");
+            request.getSession().setAttribute("errorMessage", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/services/create");
         }
     }

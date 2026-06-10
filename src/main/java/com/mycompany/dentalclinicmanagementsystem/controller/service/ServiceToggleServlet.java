@@ -1,6 +1,6 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.service;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.ServiceDAO;
+import com.mycompany.dentalclinicmanagementsystem.service.ClinicService;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
 import jakarta.servlet.ServletException;
@@ -15,11 +15,11 @@ import java.io.IOException;
 @WebServlet("/services/toggle")
 public class ServiceToggleServlet extends HttpServlet {
 
-    private ServiceDAO serviceDAO;
+    private ClinicService clinicService;
 
     @Override
     public void init() throws ServletException {
-        serviceDAO = new ServiceDAO();
+        clinicService = new ClinicService();
     }
 
     @Override
@@ -36,13 +36,12 @@ public class ServiceToggleServlet extends HttpServlet {
             int id = Integer.parseInt(request.getParameter("id"));
             boolean status = Boolean.parseBoolean(request.getParameter("status"));
 
-            if (serviceDAO.toggleServiceStatus(id, status)) {
-                session.setAttribute("successMessage", status ? "Đã kích hoạt dịch vụ thành công." : "Đã tạm ngưng dịch vụ thành công.");
-            } else {
-                session.setAttribute("errorMessage", "Đã xảy ra lỗi khi thay đổi trạng thái dịch vụ.");
-            }
+            clinicService.toggleServiceStatus(id, status);
+            session.setAttribute("successMessage", status ? "Đã kích hoạt dịch vụ thành công." : "Đã tạm ngưng dịch vụ thành công.");
         } catch (NumberFormatException e) {
             session.setAttribute("errorMessage", "Yêu cầu không hợp lệ.");
+        } catch (Exception e) {
+            session.setAttribute("errorMessage", e.getMessage());
         }
         
         response.sendRedirect(request.getContextPath() + "/services");

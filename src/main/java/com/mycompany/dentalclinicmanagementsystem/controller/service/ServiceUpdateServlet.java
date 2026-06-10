@@ -1,6 +1,6 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.service;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.ServiceDAO;
+import com.mycompany.dentalclinicmanagementsystem.service.ClinicService;
 import com.mycompany.dentalclinicmanagementsystem.model.Service;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
@@ -17,11 +17,11 @@ import java.math.BigDecimal;
 @WebServlet("/services/update")
 public class ServiceUpdateServlet extends HttpServlet {
 
-    private ServiceDAO serviceDAO;
+    private ClinicService clinicService;
 
     @Override
     public void init() throws ServletException {
-        serviceDAO = new ServiceDAO();
+        clinicService = new ClinicService();
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ServiceUpdateServlet extends HttpServlet {
 
         try {
             int id = Integer.parseInt(request.getParameter("id"));
-            Service service = serviceDAO.getServiceById(id);
+            Service service = clinicService.getServiceById(id);
             if (service != null) {
                 request.setAttribute("service", service);
                 request.getRequestDispatcher("/WEB-INF/views/service/service-form.jsp").forward(request, response);
@@ -62,6 +62,7 @@ public class ServiceUpdateServlet extends HttpServlet {
         int serviceId = -1;
         try {
             serviceId = Integer.parseInt(request.getParameter("serviceId"));
+            String serviceCode = request.getParameter("serviceCode");
             String serviceName = request.getParameter("serviceName");
             String estimatedMinutesStr = request.getParameter("estimatedMinutes");
             String listedPriceStr = request.getParameter("listedPrice");
@@ -70,6 +71,7 @@ public class ServiceUpdateServlet extends HttpServlet {
 
             Service service = new Service();
             service.setServiceId(serviceId);
+            service.setServiceCode(serviceCode);
             service.setServiceName(serviceName);
             if (estimatedMinutesStr != null && !estimatedMinutesStr.trim().isEmpty()) {
                 service.setEstimatedMinutes(Integer.parseInt(estimatedMinutesStr));
@@ -82,16 +84,13 @@ public class ServiceUpdateServlet extends HttpServlet {
             service.setDescription(description);
             service.setActive(isActive);
 
-            if (serviceDAO.updateService(service)) {
-                session.setAttribute("successMessage", "Cập nhật dịch vụ thành công.");
-                response.sendRedirect(request.getContextPath() + "/services");
-            } else {
-                session.setAttribute("errorMessage", "Đã xảy ra lỗi khi cập nhật dịch vụ.");
-                response.sendRedirect(request.getContextPath() + "/services/update?id=" + serviceId);
-            }
+            clinicService.updateService(service);
+            session.setAttribute("successMessage", "Cập nhật dịch vụ thành công.");
+            response.sendRedirect(request.getContextPath() + "/services");
+            
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("errorMessage", "Dữ liệu không hợp lệ.");
+            session.setAttribute("errorMessage", e.getMessage());
             if (serviceId != -1) {
                 response.sendRedirect(request.getContextPath() + "/services/update?id=" + serviceId);
             } else {
