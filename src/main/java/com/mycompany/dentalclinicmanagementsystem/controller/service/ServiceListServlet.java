@@ -54,7 +54,7 @@ public class ServiceListServlet extends HttpServlet {
         List<Service> services = clinicService.getAllServices(search, status, offset, limit);
 
         request.setAttribute("services", services);
-        request.setAttribute("currentPage", page);
+        request.setAttribute("pageNumber", page);
         request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/views/service/service-list.jsp").forward(request, response);

@@ -106,19 +106,7 @@
     </div>
 
     <!-- Phân trang -->
-    <c:if test="${totalPages > 1}">
-        <div style="padding: 20px; display: flex; justify-content: center; border-top: 1px solid var(--border-color);">
-            <div style="display: flex; gap: 5px;">
-                <c:forEach begin="1" end="${totalPages}" var="i">
-                    <a href="?page=${i}&search=${param.search}&status=${param.status}" 
-                       class="btn ${i == currentPage ? 'btn-primary' : 'btn-secondary'}" 
-                       style="padding: 6px 12px; min-width: auto;">
-                        ${i}
-                    </a>
-                </c:forEach>
-            </div>
-        </div>
-    </c:if>
+    <t:pagination activePage="${not empty pageNumber ? pageNumber : (not empty param.page ? param.page : 1)}" totalPages="${totalPages}" urlParams="&search=${param.search}&status=${param.status}" />
 </div>
 
 <jsp:include page="/WEB-INF/views/layout/footer.jsp" />

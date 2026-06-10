@@ -394,7 +394,15 @@ INSERT INTO services (service_code, service_name, estimated_minutes, listed_pric
   ('SV-004', 'Nhổ Răng Khôn (Mọc thẳng)', 45, 1000000.00, 'Nhổ răng khôn hàm trên/dưới mọc thẳng, không tiểu phẫu.', TRUE),
   ('SV-005', 'Trám Răng Thẩm Mỹ', 30, 400000.00, 'Trám composite thẩm mỹ cao cho răng sâu, sứt mẻ nhẹ.', TRUE),
   ('SV-006', 'Bọc Răng Sứ Cercon', 120, 5000000.00, 'Bọc răng sứ toàn sứ Cercon nhập khẩu Đức, bảo hành 10 năm.', TRUE),
-  ('SV-007', 'Niềng Răng Mắc Cài Kim Loại', 60, 30000000.00, 'Chỉnh nha bằng mắc cài kim loại tiêu chuẩn.', FALSE);
+  ('SV-007', 'Niềng Răng Mắc Cài Kim Loại', 60, 30000000.00, 'Chỉnh nha bằng mắc cài kim loại tiêu chuẩn.', FALSE),
+  ('SV-008', 'Cắm Ghép Implant', 90, 15000000.00, 'Cấy ghép chân răng nhân tạo Implant cao cấp từ Hàn Quốc.', TRUE),
+  ('SV-009', 'Lấy Tủy Răng Sữa', 30, 200000.00, 'Điều trị nội nha lấy tủy răng sữa cho trẻ em.', TRUE),
+  ('SV-010', 'Nhổ Răng Sữa', 15, 100000.00, 'Nhổ răng sữa sắp rụng, bôi tê nhẹ nhàng không đau.', TRUE),
+  ('SV-011', 'Lấy Tủy Răng Vĩnh Viễn', 60, 1000000.00, 'Điều trị tủy răng người lớn bằng máy Protaper.', TRUE),
+  ('SV-012', 'Phẫu Thuật Cắt Lợi', 45, 2000000.00, 'Tiểu phẫu cắt lợi trùm, điều trị cười hở lợi thẩm mỹ.', TRUE),
+  ('SV-013', 'Bọc Răng Sứ Zirconia', 120, 3500000.00, 'Bọc sứ toàn sứ Zirconia chính hãng.', TRUE),
+  ('SV-014', 'Khám & Tư Vấn Chỉnh Nha', 30, 150000.00, 'Lấy dấu răng, chụp phim và lên phác đồ niềng răng.', TRUE),
+  ('SV-015', 'Tẩy Trắng Răng Tại Nhà', 15, 1200000.00, 'Làm máng tẩy trắng và cung cấp thuốc tẩy trắng tự dùng tại nhà.', TRUE);
 
 -- =====================================================
 -- SEED INVOICES & PAYMENTS
