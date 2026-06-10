@@ -1,4 +1,4 @@
-package com.mycompany.dentalclinicmanagementsystem.controller;
+package com.mycompany.dentalclinicmanagementsystem.controller.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
