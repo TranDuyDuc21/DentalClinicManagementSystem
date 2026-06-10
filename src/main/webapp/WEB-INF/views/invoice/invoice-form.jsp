@@ -61,7 +61,7 @@
                             <tr style="border-bottom: 1px solid var(--border-color);">
                                 <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required value="${item.description}" style="width: 100%; box-sizing: border-box;"></td>
                                 <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" min="1" onchange="calcTotal()" required value="${item.quantity}" style="width: 100%; box-sizing: border-box;"></td>
-                                <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" min="0" step="1000" onchange="calcTotal()" required value="${item.unitPrice}" style="width: 100%; box-sizing: border-box;"></td>
+                                <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" min="0" step="1" onchange="calcTotal()" required readonly value="${item.unitPrice}" style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;"></td>
                                 <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">${item.lineTotal}</td>
                                 <td style="padding: 10px; text-align: center;">
                                     <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
@@ -76,7 +76,7 @@
                                     <tr style="border-bottom: 1px solid var(--border-color);">
                                         <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required value="${item.description}" style="width: 100%; box-sizing: border-box;"></td>
                                         <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="${item.quantity}" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
-                                        <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="${item.unitPrice}" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                        <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="${item.unitPrice}" min="0" step="1" onchange="calcTotal()" required readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;"></td>
                                         <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">${item.lineTotal}</td>
                                         <td style="padding: 10px; text-align: center;">
                                             <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
@@ -88,7 +88,7 @@
                                 <tr style="border-bottom: 1px solid var(--border-color);">
                                     <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
                                     <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
-                                    <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+                                    <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1" onchange="calcTotal()" required readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;"></td>
                                     <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
                                     <td style="padding: 10px; text-align: center;">
                                         <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
@@ -107,7 +107,7 @@
                     <tr>
                         <td colspan="3" style="padding: 12px; text-align: right; color: var(--text-secondary);">Giảm giá (VND):</td>
                         <td style="padding: 10px;">
-                            <input type="number" class="form-control" name="discount" id="discountInput" value="${not empty invoice ? invoice.discount : 0}" min="0" step="1000" onchange="calcTotal()" style="width: 100%; box-sizing: border-box; text-align: right;">
+                            <input type="number" class="form-control" name="discount" id="discountInput" value="${not empty invoice ? invoice.discount : 0}" min="0" step="1" onchange="calcTotal()" style="width: 100%; box-sizing: border-box; text-align: right;">
                         </td>
                         <td></td>
                     </tr>
@@ -136,7 +136,7 @@
         tr.innerHTML = `
             <td style="padding: 10px;"><input type="text" class="form-control" name="description[]" required style="width: 100%; box-sizing: border-box;"></td>
             <td style="padding: 10px;"><input type="number" class="form-control qty" name="quantity[]" value="1" min="1" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
-            <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1000" onchange="calcTotal()" required style="width: 100%; box-sizing: border-box;"></td>
+            <td style="padding: 10px;"><input type="number" class="form-control price" name="unitPrice[]" value="0" min="0" step="1" onchange="calcTotal()" required readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;"></td>
             <td style="padding: 10px; text-align: right; font-weight: 600; color: var(--text-primary);" class="line-total">0</td>
             <td style="padding: 10px; text-align: center;">
                 <button type="button" class="btn" style="background: var(--error); color: white; padding: 6px 10px; min-width: auto; width: auto;" onclick="removeItem(this)"><i class="fa-solid fa-trash"></i></button>
