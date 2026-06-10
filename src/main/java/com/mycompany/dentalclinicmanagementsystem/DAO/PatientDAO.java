@@ -64,7 +64,7 @@ public class PatientDAO {
         return false;
     }
 
-    public java.util.List<Patient> getAllPatients(String search, String gender) {
+    public java.util.List<Patient> getAllPatients(String search, String gender, int offset, int limit) {
         java.util.List<Patient> patients = new java.util.ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM patients WHERE 1=1 ");
         
@@ -75,7 +75,8 @@ public class PatientDAO {
             sql.append("AND gender = ? ");
         }
         
-        sql.append("ORDER BY created_at DESC");
+        sql.append("ORDER BY created_at DESC ");
+        sql.append("LIMIT ? OFFSET ?");
 
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -90,6 +91,8 @@ public class PatientDAO {
             if (gender != null && !gender.trim().isEmpty()) {
                 ps.setString(paramIndex++, gender.trim());
             }
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -115,14 +118,48 @@ public class PatientDAO {
         return patients;
     }
 
-    public Patient getPatientByPhone(String phone) {
-        String sql = "SELECT * FROM patients WHERE phone_number = ?";
+    public int getTotalPatients(String search, String gender) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM patients WHERE 1=1 ");
+        
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append("AND (full_name LIKE ? OR patient_code LIKE ? OR phone_number LIKE ?) ");
+        }
+        if (gender != null && !gender.trim().isEmpty()) {
+            sql.append("AND gender = ? ");
+        }
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+             
+            int paramIndex = 1;
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (gender != null && !gender.trim().isEmpty()) {
+                ps.setString(paramIndex++, gender.trim());
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public java.util.List<Patient> getPatientsByPhone(String phone) {
+        java.util.List<Patient> patients = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM patients WHERE phone_number = ? ORDER BY created_at DESC";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setString(1, phone);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     Patient p = new Patient();
                     p.setPatientId(rs.getInt("patient_id"));
                     p.setPatientCode(rs.getString("patient_code"));
@@ -136,14 +173,14 @@ public class PatientDAO {
                     p.setMedicalHistory(rs.getString("medical_history"));
                     p.setDrugAllergies(rs.getString("drug_allergies"));
                     p.setCreatedAt(rs.getTimestamp("created_at"));
-                    return p;
+                    patients.add(p);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting patient by phone: " + e.getMessage());
+            System.err.println("Error getting patients by phone: " + e.getMessage());
             e.printStackTrace();
         }
-        return null;
+        return patients;
     }
 
     public boolean updatePatient(Patient patient) {
