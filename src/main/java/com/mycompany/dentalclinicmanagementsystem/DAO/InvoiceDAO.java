@@ -9,7 +9,7 @@ import java.util.List;
 
 public class InvoiceDAO extends DBContext {
 
-    public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr) {
+    public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr, int offset, int limit) {
         List<Invoice> list = new ArrayList<>();
         String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName, " +
                      "(SELECT GROUP_CONCAT(DISTINCT py.payment_method SEPARATOR ', ') FROM payments py WHERE py.invoice_id = i.invoice_id) as paymentMethods " +
@@ -32,7 +32,54 @@ public class InvoiceDAO extends DBContext {
             sql += " AND (i.invoice_code LIKE ? OR p.full_name LIKE ? OR p.phone_number LIKE ?) ";
         }
         
-        sql += " ORDER BY i.created_at DESC";
+        sql += " ORDER BY i.created_at DESC ";
+        sql += " LIMIT ? OFFSET ?";
+
+        try (Connection connection = DBContext.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+            if (status != null && !status.isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (paymentMethod != null && !paymentMethod.isEmpty()) {
+                ps.setString(paramIndex++, paymentMethod);
+            }
+            if (searchStr != null && !searchStr.isEmpty()) {
+                String likeSearch = "%" + searchStr + "%";
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+                ps.setString(paramIndex++, likeSearch);
+            }
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Invoice inv = mapInvoice(rs);
+                    list.add(inv);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("getAllInvoices error: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public int getTotalInvoices(String status, String paymentMethod, String searchStr) {
+        String sql = "SELECT COUNT(*) " +
+                     "FROM invoices i " +
+                     "JOIN patients p ON i.patient_id = p.patient_id " +
+                     "WHERE 1=1 ";
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND i.status = ? ";
+        }
+        if (paymentMethod != null && !paymentMethod.isEmpty()) {
+            sql += " AND EXISTS (SELECT 1 FROM payments py WHERE py.invoice_id = i.invoice_id AND py.payment_method = ?) ";
+        }
+        if (searchStr != null && !searchStr.isEmpty()) {
+            sql += " AND (i.invoice_code LIKE ? OR p.full_name LIKE ? OR p.phone_number LIKE ?) ";
+        }
 
         try (Connection connection = DBContext.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -51,15 +98,12 @@ public class InvoiceDAO extends DBContext {
             }
 
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Invoice inv = mapInvoice(rs);
-                    list.add(inv);
-                }
+                if (rs.next()) return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("getAllInvoices error: " + e.getMessage());
+            System.out.println("getTotalInvoices error: " + e.getMessage());
         }
-        return list;
+        return 0;
     }
 
     public Invoice getInvoiceById(int id) {
