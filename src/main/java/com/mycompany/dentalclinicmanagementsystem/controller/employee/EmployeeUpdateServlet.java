@@ -1,10 +1,8 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.employee;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.RoleDAO;
-import com.mycompany.dentalclinicmanagementsystem.dao.UserDAO;
 import com.mycompany.dentalclinicmanagementsystem.model.Role;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
-import com.mycompany.dentalclinicmanagementsystem.util.PasswordUtil;
+import com.mycompany.dentalclinicmanagementsystem.service.EmployeeService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,13 +17,11 @@ import java.util.List;
 @WebServlet("/employees/update")
 public class EmployeeUpdateServlet extends HttpServlet {
 
-    private UserDAO userDAO;
-    private RoleDAO roleDAO;
+    private EmployeeService employeeService;
 
     @Override
     public void init() throws ServletException {
-        userDAO = new UserDAO();
-        roleDAO = new RoleDAO();
+        employeeService = new EmployeeService();
     }
 
     @Override
@@ -39,7 +35,7 @@ public class EmployeeUpdateServlet extends HttpServlet {
         }
 
         int id = Integer.parseInt(request.getParameter("id"));
-        User employee = userDAO.getEmployeeById(id);
+        User employee = employeeService.getEmployeeById(id);
         
         if (employee == null) {
             session.setAttribute("errorMessage", "Không tìm thấy nhân viên.");
@@ -47,7 +43,7 @@ public class EmployeeUpdateServlet extends HttpServlet {
             return;
         }
 
-        List<Role> roles = roleDAO.getAllRolesForEmployees();
+        List<Role> roles = employeeService.getAllRolesForEmployees();
         request.setAttribute("employee", employee);
         request.setAttribute("roles", roles);
         request.getRequestDispatcher("/WEB-INF/views/employee/employee-form.jsp").forward(request, response);
@@ -70,18 +66,7 @@ public class EmployeeUpdateServlet extends HttpServlet {
         boolean isActive = "on".equals(request.getParameter("isActive"));
         String password = request.getParameter("password");
 
-        User employee = new User();
-        employee.setUserId(id);
-        employee.setFullName(fullName);
-        employee.setPhoneNumber(phoneNumber);
-        employee.setRoleId(roleId);
-        employee.setActive(isActive);
-        
-        if (password != null && !password.trim().isEmpty()) {
-            employee.setPasswordHash(PasswordUtil.hashPassword(password));
-        }
-
-        boolean success = userDAO.updateEmployee(employee);
+        boolean success = employeeService.updateEmployee(id, fullName, phoneNumber, roleId, isActive, password);
 
         if (success) {
             session.setAttribute("successMessage", "Cập nhật nhân viên thành công.");

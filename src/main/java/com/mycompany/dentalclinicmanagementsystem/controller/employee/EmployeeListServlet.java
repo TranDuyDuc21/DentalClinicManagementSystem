@@ -1,9 +1,7 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.employee;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.RoleDAO;
-import com.mycompany.dentalclinicmanagementsystem.dao.UserDAO;
-import com.mycompany.dentalclinicmanagementsystem.model.Role;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
+import com.mycompany.dentalclinicmanagementsystem.service.EmployeeService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,18 +10,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 @WebServlet("/employees")
 public class EmployeeListServlet extends HttpServlet {
 
-    private UserDAO userDAO;
-    private RoleDAO roleDAO;
+    private EmployeeService employeeService;
 
     @Override
     public void init() throws ServletException {
-        userDAO = new UserDAO();
-        roleDAO = new RoleDAO();
+        employeeService = new EmployeeService();
     }
 
     @Override
@@ -49,24 +45,18 @@ public class EmployeeListServlet extends HttpServlet {
         if (pageStr != null && !pageStr.isEmpty()) {
             try {
                 page = Integer.parseInt(pageStr);
-                if (page < 1) page = 1;
             } catch (NumberFormatException e) {
                 page = 1;
             }
         }
         int limit = 10;
-        int offset = (page - 1) * limit;
 
-        List<User> employees = userDAO.getEmployees(search, roleId, status, offset, limit);
-        int totalEmployees = userDAO.getTotalEmployees(search, roleId, status);
-        int totalPages = (int) Math.ceil((double) totalEmployees / limit);
-
-        List<Role> roles = roleDAO.getAllRolesForEmployees();
+        Map<String, Object> result = employeeService.getEmployeesList(search, roleId, status, page, limit);
         
-        request.setAttribute("employees", employees);
-        request.setAttribute("roles", roles);
-        request.setAttribute("pageNumber", page);
-        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("employees", result.get("employees"));
+        request.setAttribute("roles", result.get("roles"));
+        request.setAttribute("pageNumber", result.get("pageNumber"));
+        request.setAttribute("totalPages", result.get("totalPages"));
         
         request.getRequestDispatcher("/WEB-INF/views/employee/employee-list.jsp").forward(request, response);
     }

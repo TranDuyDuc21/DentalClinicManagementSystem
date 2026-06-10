@@ -1,7 +1,7 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.employee;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.UserDAO;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
+import com.mycompany.dentalclinicmanagementsystem.service.EmployeeService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,11 +15,11 @@ import java.io.IOException;
 @WebServlet("/employees/toggle")
 public class EmployeeToggleServlet extends HttpServlet {
 
-    private UserDAO userDAO;
+    private EmployeeService employeeService;
 
     @Override
     public void init() throws ServletException {
-        userDAO = new UserDAO();
+        employeeService = new EmployeeService();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class EmployeeToggleServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         boolean status = Boolean.parseBoolean(request.getParameter("status"));
 
-        boolean success = userDAO.toggleEmployeeStatus(id, status);
+        boolean success = employeeService.toggleEmployeeStatus(id, status);
 
         if (success) {
             session.setAttribute("successMessage", "Đổi trạng thái tài khoản thành công.");

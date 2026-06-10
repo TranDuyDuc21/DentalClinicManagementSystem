@@ -1,10 +1,8 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.employee;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.RoleDAO;
-import com.mycompany.dentalclinicmanagementsystem.dao.UserDAO;
 import com.mycompany.dentalclinicmanagementsystem.model.Role;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
-import com.mycompany.dentalclinicmanagementsystem.util.PasswordUtil;
+import com.mycompany.dentalclinicmanagementsystem.service.EmployeeService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,13 +17,11 @@ import java.util.List;
 @WebServlet("/employees/create")
 public class EmployeeCreateServlet extends HttpServlet {
 
-    private UserDAO userDAO;
-    private RoleDAO roleDAO;
+    private EmployeeService employeeService;
 
     @Override
     public void init() throws ServletException {
-        userDAO = new UserDAO();
-        roleDAO = new RoleDAO();
+        employeeService = new EmployeeService();
     }
 
     @Override
@@ -38,7 +34,7 @@ public class EmployeeCreateServlet extends HttpServlet {
             return;
         }
 
-        List<Role> roles = roleDAO.getAllRolesForEmployees();
+        List<Role> roles = employeeService.getAllRolesForEmployees();
         request.setAttribute("roles", roles);
         request.getRequestDispatcher("/WEB-INF/views/employee/employee-form.jsp").forward(request, response);
     }
@@ -61,33 +57,13 @@ public class EmployeeCreateServlet extends HttpServlet {
         int roleId = Integer.parseInt(request.getParameter("roleId"));
         boolean isActive = "on".equals(request.getParameter("isActive"));
 
-        if (userDAO.isUsernameExists(username)) {
-            session.setAttribute("errorMessage", "Tên đăng nhập đã tồn tại.");
-            response.sendRedirect(request.getContextPath() + "/employees/create");
-            return;
-        }
-        if (userDAO.isEmailExists(email)) {
-            session.setAttribute("errorMessage", "Email đã tồn tại.");
-            response.sendRedirect(request.getContextPath() + "/employees/create");
-            return;
-        }
+        String result = employeeService.createEmployee(username, email, password, fullName, phoneNumber, roleId, isActive);
 
-        User employee = new User();
-        employee.setUsername(username);
-        employee.setEmail(email);
-        employee.setPasswordHash(PasswordUtil.hashPassword(password));
-        employee.setFullName(fullName);
-        employee.setPhoneNumber(phoneNumber);
-        employee.setRoleId(roleId);
-        employee.setActive(isActive);
-
-        boolean success = userDAO.createEmployee(employee);
-
-        if (success) {
+        if ("SUCCESS".equals(result)) {
             session.setAttribute("successMessage", "Thêm nhân viên thành công.");
             response.sendRedirect(request.getContextPath() + "/employees");
         } else {
-            session.setAttribute("errorMessage", "Có lỗi xảy ra khi thêm nhân viên.");
+            session.setAttribute("errorMessage", result);
             response.sendRedirect(request.getContextPath() + "/employees/create");
         }
     }
