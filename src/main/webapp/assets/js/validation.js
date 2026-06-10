@@ -61,7 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (isValid) {
-                form.submit();
+                if (form.hasAttribute('data-ajax')) {
+                    form.dispatchEvent(new Event('validSubmit', { bubbles: true, cancelable: true }));
+                } else {
+                    form.submit();
+                }
             } else {
                 const firstError = form.querySelector('.is-invalid');
                 if (firstError) {

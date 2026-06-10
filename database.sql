@@ -120,7 +120,7 @@ CREATE TABLE doctor_schedules (
 CREATE TABLE patients (
   patient_id     INT AUTO_INCREMENT PRIMARY KEY,
   patient_code   VARCHAR(20) NOT NULL UNIQUE,       -- PT-YYYY-XXXX
-  user_id        INT UNIQUE,                         -- linked customer account (nullable for walk-ins)
+  user_id        INT,                         -- linked customer account (nullable for walk-ins)
   full_name      VARCHAR(150) NOT NULL,
   date_of_birth  DATE,
   gender         ENUM('Male','Female','Other'),
@@ -393,6 +393,18 @@ INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, p
   ('PT-2026-0001', 5, 'Khách Hàng Vip', '1990-05-15', 'Male', '0901234571', 'customer@dental.com', '123 Nguyễn Văn Cừ, Quận 5, TP.HCM', 'Không có bệnh lý nền', 'Không'),
   ('PT-2026-0002', NULL, 'Nguyễn Thị Thu Hương', '1985-08-22', 'Female', '0987654321', 'huongnt@email.com', '456 Lê Lợi, Quận 1, TP.HCM', 'Huyết áp thấp', 'Dị ứng thuốc tê nhẹ'),
   ('PT-2026-0003', NULL, 'Trần Văn Nam', '2000-11-10', 'Male', '0912345678', 'namtran@email.com', '789 Xa Lộ Hà Nội, TP. Thủ Đức', 'Tiểu đường tuýp 2', 'Penicillin');
+
+-- Thêm User Mẹ để test tính năng Family Account
+INSERT INTO users (role_id, username, email, password_hash, full_name, phone_number, is_active) 
+VALUES (5, 'lethime', 'lethime@family.com', '123456', 'Lê Thị Mẹ', '0999888777', TRUE);
+SET @motherUserId = LAST_INSERT_ID();
+
+-- Thêm 3 hồ sơ bệnh nhân (1 mẹ, 2 con) dùng chung số điện thoại của mẹ, và chung user_id của mẹ
+INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, phone_number, email, address, medical_history, drug_allergies) VALUES
+  ('PT-2026-F001', @motherUserId, 'Lê Thị Mẹ', '1988-01-01', 'Female', '0999888777', 'lethime@family.com', 'Khu dân cư ABC, Quận 7', 'Không', 'Không'),
+  ('PT-2026-F002', @motherUserId, 'Bé Nguyễn Văn Tèo', '2018-05-05', 'Male', '0999888777', NULL, 'Khu dân cư ABC, Quận 7', 'Không', 'Không'),
+  ('PT-2026-F003', @motherUserId, 'Bé Nguyễn Thị Tí', '2020-08-08', 'Female', '0999888777', NULL, 'Khu dân cư ABC, Quận 7', 'Không', 'Không');
+
 
 -- =====================================================
 -- SEED SERVICES

@@ -36,29 +36,37 @@ public class PatientApiServlet extends HttpServlet {
             return;
         }
 
-        Patient patient = patientDAO.getPatientByPhone(phone.trim());
+        java.util.List<Patient> patients = patientDAO.getPatientsByPhone(phone.trim());
 
-        if (patient != null) {
+        if (patients != null && !patients.isEmpty()) {
             StringBuilder json = new StringBuilder();
             json.append("{");
             json.append("\"success\": true,");
-            json.append("\"patient\": {");
-            json.append("\"patientId\": ").append(patient.getPatientId()).append(",");
-            json.append("\"patientCode\": \"").append(escapeJson(patient.getPatientCode())).append("\",");
-            json.append("\"fullName\": \"").append(escapeJson(patient.getFullName())).append("\",");
-            
-            String dobStr = "";
-            if (patient.getDateOfBirth() != null) {
-                dobStr = new SimpleDateFormat("yyyy-MM-dd").format(patient.getDateOfBirth());
+            json.append("\"patients\": [");
+            for (int i = 0; i < patients.size(); i++) {
+                Patient patient = patients.get(i);
+                json.append("{");
+                json.append("\"patientId\": ").append(patient.getPatientId()).append(",");
+                json.append("\"patientCode\": \"").append(escapeJson(patient.getPatientCode())).append("\",");
+                json.append("\"fullName\": \"").append(escapeJson(patient.getFullName())).append("\",");
+                
+                String dobStr = "";
+                if (patient.getDateOfBirth() != null) {
+                    dobStr = new SimpleDateFormat("yyyy-MM-dd").format(patient.getDateOfBirth());
+                }
+                json.append("\"dateOfBirth\": \"").append(dobStr).append("\",");
+                json.append("\"gender\": \"").append(escapeJson(patient.getGender())).append("\",");
+                json.append("\"phoneNumber\": \"").append(escapeJson(patient.getPhoneNumber())).append("\",");
+                json.append("\"email\": \"").append(escapeJson(patient.getEmail())).append("\",");
+                json.append("\"address\": \"").append(escapeJson(patient.getAddress())).append("\",");
+                json.append("\"medicalHistory\": \"").append(escapeJson(patient.getMedicalHistory())).append("\",");
+                json.append("\"drugAllergies\": \"").append(escapeJson(patient.getDrugAllergies())).append("\"");
+                json.append("}");
+                if (i < patients.size() - 1) {
+                    json.append(",");
+                }
             }
-            json.append("\"dateOfBirth\": \"").append(dobStr).append("\",");
-            json.append("\"gender\": \"").append(escapeJson(patient.getGender())).append("\",");
-            json.append("\"phoneNumber\": \"").append(escapeJson(patient.getPhoneNumber())).append("\",");
-            json.append("\"email\": \"").append(escapeJson(patient.getEmail())).append("\",");
-            json.append("\"address\": \"").append(escapeJson(patient.getAddress())).append("\",");
-            json.append("\"medicalHistory\": \"").append(escapeJson(patient.getMedicalHistory())).append("\",");
-            json.append("\"drugAllergies\": \"").append(escapeJson(patient.getDrugAllergies())).append("\"");
-            json.append("}");
+            json.append("]");
             json.append("}");
             out.print(json.toString());
         } else {
