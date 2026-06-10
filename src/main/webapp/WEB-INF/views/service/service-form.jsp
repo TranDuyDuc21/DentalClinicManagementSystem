@@ -12,7 +12,7 @@
     </a>
 </div>
 
-<div class="card" style="padding: 30px; max-width: 800px; margin: 0 auto;">
+<div class="card" style="padding: 30px;">
     <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
         <i class="fa-solid ${not empty service ? 'fa-pen-to-square' : 'fa-plus'}"></i> 
         ${not empty service ? 'Cập Nhật Dịch Vụ' : 'Thêm Dịch Vụ Mới'}
@@ -25,9 +25,17 @@
             <input type="hidden" name="serviceId" value="${service.serviceId}">
         </c:if>
 
-        <div class="form-group">
-            <label class="form-label" for="serviceName">Tên dịch vụ <span style="color: var(--error);">*</span></label>
-            <input type="text" class="form-control" id="serviceName" name="serviceName" value="${service.serviceName}" required maxlength="150" placeholder="Nhập tên dịch vụ nha khoa">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+            <div class="form-group">
+                <label class="form-label" for="serviceCode">Mã dịch vụ <span style="color: var(--error);">*</span></label>
+                <input type="text" class="form-control" id="serviceCode" name="serviceCode" value="${service.serviceCode}" required maxlength="20" placeholder="VD: SV-001">
+                <div id="serviceCodeFeedback" style="font-size: 0.85rem; margin-top: 5px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="serviceName">Tên dịch vụ <span style="color: var(--error);">*</span></label>
+                <input type="text" class="form-control" id="serviceName" name="serviceName" value="${service.serviceName}" required maxlength="150" placeholder="Nhập tên dịch vụ nha khoa">
+            </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -62,5 +70,47 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('serviceCode');
+        const feedback = document.getElementById('serviceCodeFeedback');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const excludeId = '${service.serviceId}';
+
+        let timeout = null;
+
+        codeInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const code = this.value.trim();
+            
+            if (!code) {
+                feedback.textContent = '';
+                codeInput.style.borderColor = '';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                fetch('${pageContext.request.contextPath}/api/services/check-code?code=' + encodeURIComponent(code) + (excludeId ? '&excludeId=' + excludeId : ''))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            feedback.textContent = 'Mã dịch vụ này đã tồn tại!';
+                            feedback.style.color = 'var(--error)';
+                            submitBtn.disabled = true;
+                            codeInput.style.borderColor = 'var(--error)';
+                        } else {
+                            feedback.textContent = 'Mã dịch vụ hợp lệ.';
+                            feedback.style.color = 'var(--success)';
+                            submitBtn.disabled = false;
+                            codeInput.style.borderColor = 'var(--success)';
+                        }
+                    })
+                    .catch(err => console.error('Error checking code:', err));
+            }, 500); // 500ms debounce
+        });
+    });
+</script>
 
 <jsp:include page="/WEB-INF/views/layout/footer.jsp" />

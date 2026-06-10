@@ -36,6 +36,7 @@
             <thead style="background-color: #f8fafc;">
                 <tr>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); text-align: left; width: 60px;">ID</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); text-align: left; width: 120px;">Mã Dịch Vụ</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); text-align: left;">Tên Dịch Vụ</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); text-align: right; width: 150px;">Giá Niêm Yết</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); text-align: center; width: 150px;">Thời Gian ĐT</th>
@@ -47,7 +48,7 @@
                 <c:choose>
                     <c:when test="${empty services}">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                            <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
                                 Không tìm thấy dịch vụ nào.
                             </td>
                         </tr>
@@ -56,6 +57,7 @@
                         <c:forEach var="srv" items="${services}">
                             <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
                                 <td style="padding: 12px; font-weight: 500; color: var(--text-secondary); text-align: left;">#${srv.serviceId}</td>
+                                <td style="padding: 12px; font-weight: 600; color: var(--primary); text-align: left;">${srv.serviceCode}</td>
                                 <td style="padding: 12px; font-weight: 600; color: var(--primary); text-align: left;">
                                     ${srv.serviceName}
                                     <div style="font-weight: 400; font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">

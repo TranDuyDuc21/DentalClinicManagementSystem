@@ -87,6 +87,7 @@ CREATE TABLE chairs (
 
 CREATE TABLE services (
   service_id        INT AUTO_INCREMENT PRIMARY KEY,
+  service_code      VARCHAR(20) NOT NULL UNIQUE,
   service_name      VARCHAR(150) NOT NULL,
   estimated_minutes INT,
   listed_price      DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -386,14 +387,14 @@ INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, p
 -- =====================================================
 -- SEED SERVICES
 -- =====================================================
-INSERT INTO services (service_name, estimated_minutes, listed_price, description, is_active) VALUES
-  ('Khám Tổng Quát & Tư Vấn', 30, 0.00, 'Khám, chụp X-quang cơ bản và tư vấn phác đồ điều trị ban đầu.', TRUE),
-  ('Cạo Vôi Răng & Đánh Bóng', 45, 300000.00, 'Làm sạch mảng bám, cao răng và đánh bóng bề mặt răng.', TRUE),
-  ('Tẩy Trắng Răng Laser', 60, 2500000.00, 'Tẩy trắng răng công nghệ Laser tiên tiến, không ê buốt.', TRUE),
-  ('Nhổ Răng Khôn (Mọc thẳng)', 45, 1000000.00, 'Nhổ răng khôn hàm trên/dưới mọc thẳng, không tiểu phẫu.', TRUE),
-  ('Trám Răng Thẩm Mỹ', 30, 400000.00, 'Trám composite thẩm mỹ cao cho răng sâu, sứt mẻ nhẹ.', TRUE),
-  ('Bọc Răng Sứ Cercon', 120, 5000000.00, 'Bọc răng sứ toàn sứ Cercon nhập khẩu Đức, bảo hành 10 năm.', TRUE),
-  ('Niềng Răng Mắc Cài Kim Loại', 60, 30000000.00, 'Chỉnh nha bằng mắc cài kim loại tiêu chuẩn.', FALSE);
+INSERT INTO services (service_code, service_name, estimated_minutes, listed_price, description, is_active) VALUES
+  ('SV-001', 'Khám Tổng Quát & Tư Vấn', 30, 0.00, 'Khám, chụp X-quang cơ bản và tư vấn phác đồ điều trị ban đầu.', TRUE),
+  ('SV-002', 'Cạo Vôi Răng & Đánh Bóng', 45, 300000.00, 'Làm sạch mảng bám, cao răng và đánh bóng bề mặt răng.', TRUE),
+  ('SV-003', 'Tẩy Trắng Răng Laser', 60, 2500000.00, 'Tẩy trắng răng công nghệ Laser tiên tiến, không ê buốt.', TRUE),
+  ('SV-004', 'Nhổ Răng Khôn (Mọc thẳng)', 45, 1000000.00, 'Nhổ răng khôn hàm trên/dưới mọc thẳng, không tiểu phẫu.', TRUE),
+  ('SV-005', 'Trám Răng Thẩm Mỹ', 30, 400000.00, 'Trám composite thẩm mỹ cao cho răng sâu, sứt mẻ nhẹ.', TRUE),
+  ('SV-006', 'Bọc Răng Sứ Cercon', 120, 5000000.00, 'Bọc răng sứ toàn sứ Cercon nhập khẩu Đức, bảo hành 10 năm.', TRUE),
+  ('SV-007', 'Niềng Răng Mắc Cài Kim Loại', 60, 30000000.00, 'Chỉnh nha bằng mắc cài kim loại tiêu chuẩn.', FALSE);
 
 -- =====================================================
 -- SEED INVOICES & PAYMENTS

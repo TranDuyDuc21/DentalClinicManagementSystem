@@ -97,19 +97,20 @@ public class ServiceDAO {
     }
 
     public boolean createService(Service service) {
-        String sql = "INSERT INTO services (service_name, estimated_minutes, listed_price, description, is_active) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO services (service_code, service_name, estimated_minutes, listed_price, description, is_active) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
-            ps.setString(1, service.getServiceName());
+            ps.setString(1, service.getServiceCode());
+            ps.setString(2, service.getServiceName());
             if (service.getEstimatedMinutes() != null) {
-                ps.setInt(2, service.getEstimatedMinutes());
+                ps.setInt(3, service.getEstimatedMinutes());
             } else {
-                ps.setNull(2, java.sql.Types.INTEGER);
+                ps.setNull(3, java.sql.Types.INTEGER);
             }
-            ps.setBigDecimal(3, service.getListedPrice());
-            ps.setString(4, service.getDescription());
-            ps.setBoolean(5, service.isActive());
+            ps.setBigDecimal(4, service.getListedPrice());
+            ps.setString(5, service.getDescription());
+            ps.setBoolean(6, service.isActive());
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -119,20 +120,21 @@ public class ServiceDAO {
     }
 
     public boolean updateService(Service service) {
-        String sql = "UPDATE services SET service_name=?, estimated_minutes=?, listed_price=?, description=?, is_active=? WHERE service_id=?";
+        String sql = "UPDATE services SET service_code=?, service_name=?, estimated_minutes=?, listed_price=?, description=?, is_active=? WHERE service_id=?";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
-            ps.setString(1, service.getServiceName());
+            ps.setString(1, service.getServiceCode());
+            ps.setString(2, service.getServiceName());
             if (service.getEstimatedMinutes() != null) {
-                ps.setInt(2, service.getEstimatedMinutes());
+                ps.setInt(3, service.getEstimatedMinutes());
             } else {
-                ps.setNull(2, java.sql.Types.INTEGER);
+                ps.setNull(3, java.sql.Types.INTEGER);
             }
-            ps.setBigDecimal(3, service.getListedPrice());
-            ps.setString(4, service.getDescription());
-            ps.setBoolean(5, service.isActive());
-            ps.setInt(6, service.getServiceId());
+            ps.setBigDecimal(4, service.getListedPrice());
+            ps.setString(5, service.getDescription());
+            ps.setBoolean(6, service.isActive());
+            ps.setInt(7, service.getServiceId());
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -155,9 +157,33 @@ public class ServiceDAO {
         return false;
     }
 
+    public boolean isServiceCodeExists(String serviceCode, Integer excludeId) {
+        StringBuilder sql = new StringBuilder("SELECT 1 FROM services WHERE service_code = ?");
+        if (excludeId != null) {
+            sql.append(" AND service_id != ?");
+        }
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            
+            ps.setString(1, serviceCode);
+            if (excludeId != null) {
+                ps.setInt(2, excludeId);
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Service mapResultSetToService(ResultSet rs) throws SQLException {
         Service s = new Service();
         s.setServiceId(rs.getInt("service_id"));
+        s.setServiceCode(rs.getString("service_code"));
         s.setServiceName(rs.getString("service_name"));
         s.setEstimatedMinutes(rs.getObject("estimated_minutes") != null ? rs.getInt("estimated_minutes") : null);
         s.setListedPrice(rs.getBigDecimal("listed_price"));

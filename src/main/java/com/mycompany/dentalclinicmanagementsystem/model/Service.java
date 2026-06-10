@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public class Service {
     private int serviceId;
+    private String serviceCode;
     private String serviceName;
     private Integer estimatedMinutes;
     private BigDecimal listedPrice;
@@ -19,6 +20,14 @@ public class Service {
 
     public void setServiceId(int serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
     }
 
     public String getServiceName() {
