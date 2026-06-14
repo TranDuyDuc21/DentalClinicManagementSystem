@@ -2,6 +2,8 @@ package com.mycompany.dentalclinicmanagementsystem.controller.appointment;
 
 import com.mycompany.dentalclinicmanagementsystem.dao.AppointmentDAO;
 import com.mycompany.dentalclinicmanagementsystem.model.Appointment;
+import com.mycompany.dentalclinicmanagementsystem.model.User;
+import com.mycompany.dentalclinicmanagementsystem.service.AppointmentService;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +19,12 @@ public class AppointmentListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        User loggedUser = (User) request.getSession().getAttribute("loggedUser");
+        if (loggedUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         String searchStr = request.getParameter("search");
         String status = request.getParameter("status");
         
@@ -37,9 +45,9 @@ public class AppointmentListServlet extends HttpServlet {
         int limit = 10;
         int offset = (page - 1) * limit;
 
-        AppointmentDAO dao = new AppointmentDAO();
-        List<Appointment> appointments = dao.getAllAppointments(status, searchStr, offset, limit);
-        int totalAppointments = dao.getTotalAppointments(status, searchStr);
+        AppointmentService service = new AppointmentService();
+        List<Appointment> appointments = service.getAppointmentsForUser(loggedUser, status, searchStr, offset, limit);
+        int totalAppointments = service.getTotalAppointmentsForUser(loggedUser, status, searchStr);
         int totalPages = (int) Math.ceil((double) totalAppointments / limit);
 
         request.setAttribute("appointments", appointments);

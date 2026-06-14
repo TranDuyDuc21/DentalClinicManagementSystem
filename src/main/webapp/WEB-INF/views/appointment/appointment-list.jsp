@@ -71,24 +71,73 @@
                         <td style="padding: 12px; text-align: left;">
                             <div style="display: flex; gap: 10px; justify-content: flex-start; align-items: center;">
                                 <c:choose>
-                                    <c:when test="${appt.status == 'Done' && not empty appt.visitId && empty appt.invoiceId}">
-                                        <a href="${pageContext.request.contextPath}/invoice-create?visitId=${appt.visitId}" 
-                                           class="btn btn-primary" 
-                                           style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: var(--success); border-color: var(--success);">
-                                            <i class="fa-solid fa-file-invoice-dollar"></i> Tạo Hóa Đơn
-                                        </a>
-                                    </c:when>
-                                    <c:when test="${not empty appt.invoiceId}">
-                                        <a href="${pageContext.request.contextPath}/invoice-detail?id=${appt.invoiceId}" 
-                                           class="btn btn-outline-secondary" 
-                                           style="padding: 6px 12px; font-size: 0.85rem; width: auto; color: var(--text-secondary); border-color: #d1d5db;" title="Đã có hóa đơn">
-                                            <i class="fa-solid fa-check-double"></i> Xem HĐ
-                                        </a>
+                                    <c:when test="${sessionScope.loggedUser.roleName == 'Customer'}">
+                                        <c:if test="${appt.status == 'New' || appt.status == 'Waiting'}">
+                                            <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                                <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                                <input type="hidden" name="action" value="cancel">
+                                                <button type="submit" class="btn btn-outline-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; color: var(--error); border-color: var(--error);">
+                                                    <i class="fa-solid fa-xmark"></i> Hủy
+                                                </button>
+                                            </form>
+                                        </c:if>
                                     </c:when>
                                     <c:otherwise>
-                                        <button class="btn btn-outline-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto;" disabled title="Chỉ tạo được hóa đơn khi đã hoàn thành khám">
-                                            <i class="fa-solid fa-file-invoice-dollar"></i> Tạo Hóa Đơn
-                                        </button>
+                                        <!-- Doctor or Receptionist Actions -->
+                                        <c:choose>
+                                            <c:when test="${appt.status == 'New'}">
+                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;">
+                                                    <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                                    <input type="hidden" name="action" value="check-in">
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: var(--info); border-color: var(--info);">
+                                                        <i class="fa-solid fa-clipboard-check"></i> Check-in
+                                                    </button>
+                                                </form>
+                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="return confirm('Xác nhận hủy?');">
+                                                    <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                                    <input type="hidden" name="action" value="cancel">
+                                                    <button type="submit" class="btn btn-outline-secondary" style="padding: 6px 10px; min-width: auto; width: auto; color: var(--error); border-color: transparent;" title="Hủy">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </form>
+                                            </c:when>
+                                            <c:when test="${appt.status == 'Waiting'}">
+                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;">
+                                                    <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                                    <input type="hidden" name="action" value="in-exam">
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: #d97706; border-color: #d97706;">
+                                                        <i class="fa-solid fa-stethoscope"></i> Khám
+                                                    </button>
+                                                </form>
+                                            </c:when>
+                                            <c:when test="${appt.status == 'In Exam'}">
+                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;">
+                                                    <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                                    <input type="hidden" name="action" value="done">
+                                                    <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: var(--success); border-color: var(--success);">
+                                                        <i class="fa-solid fa-check"></i> Hoàn Thành
+                                                    </button>
+                                                </form>
+                                            </c:when>
+                                        </c:choose>
+
+                                        <!-- Invoice Button (Only if not customer) -->
+                                        <c:choose>
+                                            <c:when test="${appt.status == 'Done' && not empty appt.visitId && empty appt.invoiceId}">
+                                                <a href="${pageContext.request.contextPath}/invoice-create?visitId=${appt.visitId}" 
+                                                   class="btn btn-primary" 
+                                                   style="padding: 6px 12px; font-size: 0.85rem; width: auto; background-color: var(--success); border-color: var(--success);">
+                                                    <i class="fa-solid fa-file-invoice-dollar"></i> Tạo Hóa Đơn
+                                                </a>
+                                            </c:when>
+                                            <c:when test="${not empty appt.invoiceId}">
+                                                <a href="${pageContext.request.contextPath}/invoice-detail?id=${appt.invoiceId}" 
+                                                   class="btn btn-outline-secondary" 
+                                                   style="padding: 6px 12px; font-size: 0.85rem; width: auto; color: var(--text-secondary); border-color: #d1d5db;" title="Đã có hóa đơn">
+                                                    <i class="fa-solid fa-check-double"></i> Xem HĐ
+                                                </a>
+                                            </c:when>
+                                        </c:choose>
                                     </c:otherwise>
                                 </c:choose>
                                 <a href="#" class="btn btn-outline-secondary" style="padding: 6px 10px; min-width: auto; width: auto;" title="Chi tiết">
