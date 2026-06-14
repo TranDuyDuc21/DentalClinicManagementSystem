@@ -8,7 +8,7 @@ CREATE DATABASE IF NOT EXISTS dental_clinic
 USE dental_clinic;
 
 -- =====================================================
--- 1. ROLES & USERS (UC02-UC05, UC30, UC43)
+-- 1. ROLES & USERS
 -- =====================================================
 
 CREATE TABLE roles (
@@ -19,7 +19,7 @@ CREATE TABLE roles (
 
 CREATE TABLE permissions (
   permission_id   INT AUTO_INCREMENT PRIMARY KEY,
-  permission_code VARCHAR(100) NOT NULL UNIQUE,   -- e.g. 'UC14_ORDER_TEST'
+  permission_code VARCHAR(100) NOT NULL UNIQUE,   -- e.g. 'ORDER_TEST'
   description     VARCHAR(255)
 ) ENGINE=InnoDB;
 
@@ -49,7 +49,7 @@ CREATE TABLE users (
   INDEX idx_users_role (role_id)
 ) ENGINE=InnoDB;
 
--- Password reset tokens (UC04)
+-- Password reset tokens 
 CREATE TABLE password_reset_tokens (
   token_id    INT AUTO_INCREMENT PRIMARY KEY,
   user_id     INT NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE password_reset_tokens (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 2. DOCTOR PROFILE & CHAIRS (UC46)
+-- 2. DOCTOR PROFILE & CHAIRS
 -- =====================================================
 
 CREATE TABLE doctors (
@@ -82,7 +82,7 @@ CREATE TABLE chairs (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 3. SERVICE CATALOG (UC31)
+-- 3. SERVICE CATALOG
 -- =====================================================
 
 CREATE TABLE services (
@@ -96,7 +96,7 @@ CREATE TABLE services (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 4. DOCTOR WORK SCHEDULE (UC27-UC29)
+-- 4. DOCTOR WORK SCHEDULE
 -- =====================================================
 
 CREATE TABLE doctor_schedules (
@@ -114,7 +114,7 @@ CREATE TABLE doctor_schedules (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 5. PATIENT RECORDS (UC17-UC20)
+-- 5. PATIENT RECORDS
 -- =====================================================
 
 CREATE TABLE patients (
@@ -136,7 +136,7 @@ CREATE TABLE patients (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 6. APPOINTMENTS (UC06-UC13, UC16)
+-- 6. APPOINTMENTS
 -- =====================================================
 
 CREATE TABLE appointments (
@@ -166,7 +166,6 @@ CREATE TABLE appointments (
   INDEX idx_appt_doctor (doctor_id)
 ) ENGINE=InnoDB;
 
--- Email notifications/reminders log (UC08, UC11)
 CREATE TABLE email_notifications (
   notification_id  INT AUTO_INCREMENT PRIMARY KEY,
   appointment_id   INT,
@@ -179,7 +178,7 @@ CREATE TABLE email_notifications (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 7. VISIT / EXAM RECORD (UC16, UC19-UC23)
+-- 7. VISIT / EXAM RECORD
 -- =====================================================
 
 CREATE TABLE visits (
@@ -197,7 +196,7 @@ CREATE TABLE visits (
   FOREIGN KEY (doctor_id)      REFERENCES doctors(doctor_id)
 ) ENGINE=InnoDB;
 
--- Tooth/gum condition by position - dental chart (UC19)
+-- Tooth/gum condition by position - dental chart
 CREATE TABLE dental_chart_entries (
   entry_id       INT AUTO_INCREMENT PRIMARY KEY,
   visit_id       INT NOT NULL,
@@ -208,7 +207,7 @@ CREATE TABLE dental_chart_entries (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 8. MEDICATIONS & PRESCRIPTIONS (UC21)
+-- 8. MEDICATIONS & PRESCRIPTIONS
 -- =====================================================
 
 CREATE TABLE medications (
@@ -239,7 +238,7 @@ CREATE TABLE prescription_items (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 9. TREATMENT PLANS (UC22)
+-- 9. TREATMENT PLANS
 -- =====================================================
 
 CREATE TABLE treatment_plans (
@@ -264,7 +263,7 @@ CREATE TABLE treatment_steps (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 10. IMAGING & LAB TESTS (UC14, UC15, UC24-UC26)
+-- 10. IMAGING & LAB TESTS
 -- =====================================================
 
 CREATE TABLE test_orders (
@@ -296,7 +295,7 @@ CREATE TABLE test_result_files (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 11. PAYMENT & INVOICE (UC32-UC37)
+-- 11. PAYMENT & INVOICE
 -- =====================================================
 
 CREATE TABLE invoices (
@@ -340,7 +339,7 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB;
 
 -- =====================================================
--- 12. REVIEWS (UC45)
+-- 12. REVIEWS
 -- =====================================================
 
 CREATE TABLE reviews (
@@ -461,7 +460,6 @@ VALUES (@planId1, 'Vệ sinh khoang miệng và bôi tê', 1, 'Done', 100000.00)
 INSERT INTO treatment_steps (plan_id, description, step_order, status, estimated_cost)
 VALUES (@planId1, 'Tiểu phẫu nhổ răng khôn', 2, 'Done', 500000.00);
 
--- (Invoice 1 has been removed to allow testing Create Invoice functionality)
 -- 3. Create a paid invoice
 INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by)
 VALUES (2, 1, 3, '2026-06-05 14:00:00', 'Done', 'Walk-in', 2);
@@ -492,4 +490,3 @@ VALUES (LAST_INSERT_ID(), 3, 1, '2026-06-06 10:15:00', 'Răng sứt mẻ', 'Mẻ
 
 SET @visitId3 = LAST_INSERT_ID();
 
--- (Invoice 3 has been removed to allow testing Create Invoice functionality)
