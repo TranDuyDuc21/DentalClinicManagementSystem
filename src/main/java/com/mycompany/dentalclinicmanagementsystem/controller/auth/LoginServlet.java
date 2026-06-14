@@ -42,16 +42,24 @@ public class LoginServlet extends HttpServlet {
         
         String identifier = request.getParameter("identifier");
         String password = request.getParameter("password");
+        String redirectUrl = request.getParameter("redirect");
 
         try {
             User user = authService.login(identifier, password);
             HttpSession session = request.getSession(true);
             session.setAttribute("loggedUser", user);
             
-            response.sendRedirect(request.getContextPath() + authService.getRedirectUrl(user));
+            if (redirectUrl != null && !redirectUrl.trim().isEmpty() && redirectUrl.startsWith("/")) {
+                response.sendRedirect(request.getContextPath() + redirectUrl);
+            } else {
+                response.sendRedirect(request.getContextPath() + authService.getRedirectUrl(user));
+            }
         } catch (Exception e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("identifier", identifier);
+            if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                request.setAttribute("redirect", redirectUrl);
+            }
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
         }
     }

@@ -64,6 +64,58 @@ public class PatientDAO {
         return false;
     }
 
+    public Patient getPatientByUserId(int userId) {
+        String sql = "SELECT * FROM patients WHERE user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Patient p = new Patient();
+                    p.setPatientId(rs.getInt("patient_id"));
+                    p.setPatientCode(rs.getString("patient_code"));
+                    p.setUserId(rs.getInt("user_id"));
+                    p.setFullName(rs.getString("full_name"));
+                    p.setDateOfBirth(rs.getDate("date_of_birth"));
+                    p.setGender(rs.getString("gender"));
+                    p.setPhoneNumber(rs.getString("phone_number"));
+                    p.setEmail(rs.getString("email"));
+                    p.setAddress(rs.getString("address"));
+                    p.setMedicalHistory(rs.getString("medical_history"));
+                    p.setDrugAllergies(rs.getString("drug_allergies"));
+                    p.setCreatedAt(rs.getTimestamp("created_at"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting patient by user_id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean createPatientFromUser(com.mycompany.dentalclinicmanagementsystem.model.User user) {
+        String sql = "INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, phone_number, email) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            ps.setString(1, generatePatientCode());
+            ps.setInt(2, user.getUserId());
+            ps.setString(3, user.getFullName());
+            ps.setDate(4, user.getDateOfBirth());
+            ps.setString(5, user.getGender());
+            ps.setString(6, user.getPhoneNumber());
+            ps.setString(7, user.getEmail());
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error creating patient from user: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public java.util.List<Patient> getAllPatients(String search, String gender, int offset, int limit) {
         java.util.List<Patient> patients = new java.util.ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM patients WHERE 1=1 ");

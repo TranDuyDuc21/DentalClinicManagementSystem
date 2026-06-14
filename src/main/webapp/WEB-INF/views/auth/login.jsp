@@ -19,6 +19,7 @@
         <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
         <form action="${pageContext.request.contextPath}/login" method="POST" class="validate-form">
+            <input type="hidden" name="redirect" value="${not empty param.redirect ? param.redirect : redirect}">
             <div class="form-group">
                 <label for="identifier" class="form-label">Tên đăng nhập hoặc Email</label>
                 <input type="text" id="identifier" name="identifier" class="form-control" 
