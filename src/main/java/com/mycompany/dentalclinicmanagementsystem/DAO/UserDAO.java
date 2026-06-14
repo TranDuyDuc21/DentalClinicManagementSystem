@@ -27,26 +27,36 @@ public class UserDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    user = new User();
-                    user.setUserId(rs.getInt("user_id"));
-                    user.setRoleId(rs.getInt("role_id"));
-                    user.setUsername(rs.getString("username"));
-                    user.setEmail(rs.getString("email"));
-                    user.setPasswordHash(rs.getString("password_hash"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setDateOfBirth(rs.getDate("date_of_birth"));
-                    user.setGender(rs.getString("gender"));
-                    user.setProfilePicture(rs.getString("profile_picture"));
-                    user.setActive(rs.getBoolean("is_active"));
-                    user.setCreatedAt(rs.getTimestamp("created_at"));
-                    user.setUpdatedAt(rs.getTimestamp("updated_at"));
-                    user.setRoleName(rs.getString("role_name"));
+                    user = mapResultSetToUser(rs);
                 }
             }
 
         } catch (SQLException e) {
             System.err.println("Error fetching user by username/email: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+    public User getUserById(int userId) {
+        User user = null;
+        String sql = "SELECT u.*, r.role_name FROM users u " +
+                     "JOIN roles r ON u.role_id = r.role_id " +
+                     "WHERE u.user_id = ?";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    user = mapResultSetToUser(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching user by id: " + e.getMessage());
             e.printStackTrace();
         }
         return user;
@@ -374,6 +384,42 @@ public class UserDAO {
             return affectedRows > 0;
         } catch (SQLException e) {
             System.err.println("Error updating password: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateProfile(User user) {
+        String sql = "UPDATE users SET full_name = ?, phone_number = ?, date_of_birth = ?, gender = ? WHERE user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhoneNumber());
+            if (user.getDateOfBirth() != null) {
+                ps.setDate(3, new java.sql.Date(user.getDateOfBirth().getTime()));
+            } else {
+                ps.setNull(3, java.sql.Types.DATE);
+            }
+            ps.setString(4, user.getGender());
+            ps.setInt(5, user.getUserId());
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating profile: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateAvatar(int userId, String avatarPath) {
+        String sql = "UPDATE users SET profile_picture = ? WHERE user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, avatarPath);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating avatar: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
