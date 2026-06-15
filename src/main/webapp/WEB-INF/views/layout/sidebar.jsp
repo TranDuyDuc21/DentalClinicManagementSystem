@@ -50,6 +50,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="${pageContext.request.contextPath}/schedules" class="nav-link ${currentPage == 'schedules' ? 'active' : ''}">
+                                <i class="fa-solid fa-calendar-days nav-icon"></i>
+                                <span class="nav-text">Lịch làm việc</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="${pageContext.request.contextPath}/reports" class="nav-link ${currentPage == 'reports' ? 'active' : ''}">
                                 <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
                                 <span class="nav-text">Báo cáo doanh thu</span>
@@ -85,13 +91,19 @@
                                 <span class="nav-text">Thanh toán & Hóa đơn</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="${pageContext.request.contextPath}/schedules" class="nav-link ${currentPage == 'schedules' ? 'active' : ''}">
+                                <i class="fa-regular fa-calendar-days nav-icon"></i>
+                                <span class="nav-text">Lịch làm việc chung</span>
+                            </a>
+                        </li>
                     </c:if>
 
                     <!-- MENU DÀNH CHO DOCTOR (BÁC SĨ) -->
                     <c:if test="${sessionScope.loggedUser.roleName == 'Doctor'}">
                         <li class="nav-section">Khám & Điều Trị</li>
                         <li class="nav-item">
-                            <a href="${pageContext.request.contextPath}/schedule" class="nav-link ${currentPage == 'schedule' ? 'active' : ''}">
+                            <a href="${pageContext.request.contextPath}/schedules" class="nav-link ${currentPage == 'schedules' ? 'active' : ''}">
                                 <i class="fa-regular fa-calendar-days nav-icon"></i>
                                 <span class="nav-text">Lịch làm việc của tôi</span>
                             </a>
@@ -119,6 +131,12 @@
                     <!-- MENU DÀNH CHO TECHNICIAN (KỸ THUẬT VIÊN) -->
                     <c:if test="${sessionScope.loggedUser.roleName == 'Technician'}">
                         <li class="nav-section">Cận Lâm Sàng</li>
+                        <li class="nav-item">
+                            <a href="${pageContext.request.contextPath}/schedules" class="nav-link ${currentPage == 'schedules' ? 'active' : ''}">
+                                <i class="fa-regular fa-calendar-days nav-icon"></i>
+                                <span class="nav-text">Lịch làm việc của tôi</span>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="${pageContext.request.contextPath}/tests" class="nav-link ${currentPage == 'tests' ? 'active' : ''}">
                                 <i class="fa-solid fa-microscope nav-icon"></i>

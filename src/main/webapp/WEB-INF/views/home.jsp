@@ -383,7 +383,19 @@
 </style>
 
 <!-- Hero Section -->
-<div class="hero-section">
+<div class="hero-section" style="position: relative;">
+    <div style="position: absolute; top: 20px; right: 40px; z-index: 100;">
+        <c:if test="${empty sessionScope.loggedUser}">
+            <a href="${pageContext.request.contextPath}/login" class="btn-premium" style="height: 45px; width: auto; padding: 0 20px; font-size: 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+            </a>
+        </c:if>
+        <c:if test="${not empty sessionScope.loggedUser}">
+            <a href="${pageContext.request.contextPath}/dashboard" class="btn-premium" style="height: 45px; width: auto; padding: 0 20px; font-size: 1rem; border-radius: 8px;">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+        </c:if>
+    </div>
     <div class="container">
         <h1 class="hero-title">Nụ Cười Hoàn Mỹ Của Bạn Khởi Nguồn Từ Đây</h1>
         <p class="hero-subtitle">Trải nghiệm dịch vụ nha khoa đẳng cấp quốc tế với hệ thống trang thiết bị tối tân và đội ngũ chuyên gia tận tâm vì sức khỏe của bạn.</p>
