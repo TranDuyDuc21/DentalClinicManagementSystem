@@ -10,7 +10,7 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-calendar-check"></i> Danh Sách Lịch Khám</h2>
-    <a href="#" class="btn btn-primary" style="width: auto;">
+    <a href="${pageContext.request.contextPath}/appointment-form" class="btn btn-primary" style="width: auto;">
         <i class="fa-solid fa-plus"></i> Đặt Lịch Mới
     </a>
 </div>

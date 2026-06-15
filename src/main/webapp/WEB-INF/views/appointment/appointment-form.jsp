@@ -13,8 +13,8 @@
 
 <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
-<div class="card" style="max-width: 800px; margin: 0 auto; padding: 30px;">
-    <form action="${pageContext.request.contextPath}/appointment-form" method="POST" class="validate-form">
+<div class="card">
+    <form action="${pageContext.request.contextPath}/appointment-form" method="POST" class="validate-form" novalidate>
         
         <c:if test="${sessionScope.loggedUser.roleName != 'Customer'}">
             <div class="form-group" style="margin-bottom: 20px;">

@@ -59,6 +59,7 @@ public class HomeServlet extends HttpServlet {
         }
 
         if (loggedUser == null) {
+            session.setAttribute("errorMessage", "Vui lòng đăng nhập để tiếp tục");
             String redirectParam = URLEncoder.encode(targetUrl, "UTF-8");
             response.sendRedirect(request.getContextPath() + "/login?redirect=" + redirectParam);
         } else {

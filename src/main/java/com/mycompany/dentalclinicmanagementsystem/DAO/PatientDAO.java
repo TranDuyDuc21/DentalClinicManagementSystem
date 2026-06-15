@@ -21,7 +21,15 @@ public class PatientDAO {
                 if (rs.next()) {
                     String lastCode = rs.getString("patient_code");
                     String sequenceStr = lastCode.substring(lastCode.lastIndexOf("-") + 1);
-                    int sequence = Integer.parseInt(sequenceStr);
+                    int sequence = 0;
+                    try {
+                        String numericPart = sequenceStr.replaceAll("\\D+", "");
+                        if (!numericPart.isEmpty()) {
+                            sequence = Integer.parseInt(numericPart);
+                        }
+                    } catch (NumberFormatException e) {
+                        sequence = 0;
+                    }
                     return codePrefix + String.format("%04d", sequence + 1);
                 }
             }
