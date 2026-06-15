@@ -58,4 +58,37 @@ public class DoctorDAO {
         }
         return doctors;
     }
+
+    public Doctor getDoctorById(int doctorId) {
+        String sql = "SELECT d.doctor_id, d.user_id, d.specialty, d.license_no, " +
+                     "u.full_name, u.email, u.phone_number, u.profile_picture " +
+                     "FROM doctors d " +
+                     "JOIN users u ON d.user_id = u.user_id " +
+                     "WHERE d.doctor_id = ?";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, doctorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Doctor doc = new Doctor();
+                    doc.setDoctorId(rs.getInt("doctor_id"));
+                    doc.setUserId(rs.getInt("user_id"));
+                    doc.setSpecialty(rs.getString("specialty"));
+                    doc.setLicenseNo(rs.getString("license_no"));
+                    doc.setFullName(rs.getString("full_name"));
+                    doc.setEmail(rs.getString("email"));
+                    doc.setPhoneNumber(rs.getString("phone_number"));
+                    doc.setProfilePicture(rs.getString("profile_picture"));
+                    return doc;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching doctor by id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

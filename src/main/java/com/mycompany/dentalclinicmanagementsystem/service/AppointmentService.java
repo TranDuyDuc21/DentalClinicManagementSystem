@@ -4,6 +4,7 @@ import com.mycompany.dentalclinicmanagementsystem.dao.AppointmentDAO;
 import com.mycompany.dentalclinicmanagementsystem.dao.DoctorDAO;
 import com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO;
 import com.mycompany.dentalclinicmanagementsystem.model.Appointment;
+import com.mycompany.dentalclinicmanagementsystem.model.Doctor;
 import com.mycompany.dentalclinicmanagementsystem.model.Patient;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
@@ -16,6 +17,7 @@ public class AppointmentService {
     private final PatientDAO patientDAO = new PatientDAO();
     private final DoctorDAO doctorDAO = new DoctorDAO();
     private final EmailService emailService = new EmailService();
+    private final com.mycompany.dentalclinicmanagementsystem.dao.EmployeeScheduleDAO employeeScheduleDAO = new com.mycompany.dentalclinicmanagementsystem.dao.EmployeeScheduleDAO();
 
     public static class BookingResult {
         public boolean success;
@@ -24,6 +26,39 @@ public class AppointmentService {
             this.success = success;
             this.message = message;
         }
+    }
+
+    private BookingResult checkScheduleAvailability(int doctorId, Timestamp scheduledDatetime) {
+        Doctor doc = doctorDAO.getDoctorById(doctorId);
+        if (doc == null) {
+            return new BookingResult(false, "Không tìm thấy thông tin Bác sĩ.");
+        }
+        int userId = doc.getUserId();
+
+        java.time.LocalDateTime localDateTime = scheduledDatetime.toLocalDateTime();
+        java.sql.Date workDate = java.sql.Date.valueOf(localDateTime.toLocalDate());
+        java.sql.Time apptTime = java.sql.Time.valueOf(localDateTime.toLocalTime());
+        
+        java.util.List<com.mycompany.dentalclinicmanagementsystem.model.EmployeeSchedule> schedules = employeeScheduleDAO.getAllSchedules(userId, workDate, workDate);
+        if (schedules.isEmpty()) {
+            return new BookingResult(false, "Bác sĩ chưa có lịch làm việc vào ngày này.");
+        }
+        
+        for (com.mycompany.dentalclinicmanagementsystem.model.EmployeeSchedule es : schedules) {
+            if (es.isDayOff()) {
+                // If the only schedule or any schedule marks the day off, and we match its shift or just generally. 
+                // Usually if they have a schedule and it's day off, they are off.
+                // To be precise, if they are off for the whole day, we might have 1 record.
+                return new BookingResult(false, "Bác sĩ đã đăng ký nghỉ vào ngày này.");
+            }
+            
+            if ((apptTime.after(es.getStartTime()) || apptTime.equals(es.getStartTime())) &&
+                (apptTime.before(es.getEndTime()) || apptTime.equals(es.getEndTime()))) {
+                return new BookingResult(true, "Available");
+            }
+        }
+        
+        return new BookingResult(false, "Giờ hẹn không nằm trong ca làm việc của bác sĩ.");
     }
 
     public BookingResult processBooking(User user, int doctorId, Integer serviceId, Timestamp scheduledDatetime, String bookingSource) {
@@ -45,6 +80,12 @@ public class AppointmentService {
             // patientId phải lấy từ form (sẽ xử lý ở hàm khác hoặc truyền trực tiếp vào).
             // Tạm thời trả lỗi nếu gọi hàm này không đúng cách.
             return new BookingResult(false, "Tài khoản nhân viên không thể đặt lịch bằng hàm này, hãy dùng form dành cho nhân viên.");
+        }
+
+        // 1.5 Kiểm tra lịch làm việc của bác sĩ
+        BookingResult scheduleCheck = checkScheduleAvailability(doctorId, scheduledDatetime);
+        if (!scheduleCheck.success) {
+            return scheduleCheck;
         }
 
         // 2. Kiểm tra trùng lịch
@@ -73,6 +114,12 @@ public class AppointmentService {
     
     // Dành cho Receptionist đặt hộ
     public BookingResult processBookingForPatient(int createdByUserId, int patientId, int doctorId, Integer serviceId, Timestamp scheduledDatetime, String bookingSource) {
+        // Kiểm tra lịch làm việc của bác sĩ
+        BookingResult scheduleCheck = checkScheduleAvailability(doctorId, scheduledDatetime);
+        if (!scheduleCheck.success) {
+            return scheduleCheck;
+        }
+
         if (appointmentDAO.checkConflict(doctorId, scheduledDatetime)) {
             return new BookingResult(false, "Bác sĩ đã có lịch hẹn hoặc bị trùng vào khoảng thời gian này.");
         }
