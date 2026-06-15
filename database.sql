@@ -99,17 +99,17 @@ CREATE TABLE services (
 -- 4. DOCTOR WORK SCHEDULE
 -- =====================================================
 
-CREATE TABLE doctor_schedules (
+CREATE TABLE employee_schedules (
   schedule_id      INT AUTO_INCREMENT PRIMARY KEY,
-  doctor_id        INT NOT NULL,
+  user_id          INT NOT NULL,
   work_date        DATE NOT NULL,
   shift            ENUM('Morning','Afternoon') NOT NULL,
   start_time       TIME NOT NULL,
   end_time         TIME NOT NULL,
   max_patients     INT NOT NULL DEFAULT 0,
   is_day_off       BOOLEAN NOT NULL DEFAULT FALSE,
-  FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id) ON DELETE CASCADE,
-  UNIQUE KEY uq_doctor_shift (doctor_id, work_date, shift),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  UNIQUE KEY uq_employee_shift (user_id, work_date, shift),
   INDEX idx_schedule_date (work_date)
 ) ENGINE=InnoDB;
 
