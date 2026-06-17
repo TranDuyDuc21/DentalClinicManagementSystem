@@ -213,6 +213,58 @@ public class InvoiceDAO extends DBContext {
         return -1;
     }
 
+    public boolean updateInvoice(Invoice invoice, List<InvoiceItem> items) {
+        String updateInvoice = "UPDATE invoices SET subtotal = ?, discount = ?, total_amount = ? WHERE invoice_id = ?";
+        String deleteItems = "DELETE FROM invoice_items WHERE invoice_id = ?";
+        String insertItem = "INSERT INTO invoice_items (invoice_id, description, quantity, unit_price, line_total) " +
+                            "VALUES (?, ?, ?, ?, ?)";
+                            
+        try (Connection connection = DBContext.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement psInv = connection.prepareStatement(updateInvoice)) {
+                    psInv.setBigDecimal(1, invoice.getSubtotal());
+                    psInv.setBigDecimal(2, invoice.getDiscount());
+                    psInv.setBigDecimal(3, invoice.getTotalAmount());
+                    psInv.setInt(4, invoice.getInvoiceId());
+                    int updated = psInv.executeUpdate();
+                    if (updated == 0) {
+                        connection.rollback();
+                        return false;
+                    }
+                }
+                
+                try (PreparedStatement psDel = connection.prepareStatement(deleteItems)) {
+                    psDel.setInt(1, invoice.getInvoiceId());
+                    psDel.executeUpdate();
+                }
+                
+                try (PreparedStatement psItem = connection.prepareStatement(insertItem)) {
+                    for (InvoiceItem item : items) {
+                        psItem.setInt(1, invoice.getInvoiceId());
+                        psItem.setString(2, item.getDescription());
+                        psItem.setInt(3, item.getQuantity());
+                        psItem.setBigDecimal(4, item.getUnitPrice());
+                        psItem.setBigDecimal(5, item.getLineTotal());
+                        psItem.addBatch();
+                    }
+                    psItem.executeBatch();
+                }
+                
+                connection.commit();
+                return true;
+            } catch (SQLException e) {
+                try { connection.rollback(); } catch (SQLException ex) {}
+                System.out.println("updateInvoice error: " + e.getMessage());
+            } finally {
+                try { connection.setAutoCommit(true); } catch (SQLException ex) {}
+            }
+        } catch (SQLException e) {
+            System.out.println("Database connection error: " + e.getMessage());
+        }
+        return false;
+    }
+
     public boolean updateInvoiceStatus(int invoiceId, String status) {
         String sql = "UPDATE invoices SET status = ? WHERE invoice_id = ?";
         try (Connection connection = DBContext.getConnection();

@@ -9,9 +9,22 @@
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice"></i> Chi Tiết Hóa Đơn #${invoice.invoiceCode}</h2>
-    <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
-        <i class="fa-solid fa-arrow-left"></i> Quay lại
-    </a>
+    <div style="display: flex; gap: 10px;">
+        <c:if test="${invoice.status == 'Unpaid'}">
+            <a href="${pageContext.request.contextPath}/invoice-update?id=${invoice.invoiceId}" class="btn btn-primary" style="width: auto;">
+                <i class="fa-solid fa-pen-to-square"></i> Chỉnh Sửa
+            </a>
+            <form action="${pageContext.request.contextPath}/invoice-cancel" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn hủy hóa đơn này không? Thao tác này không thể hoàn tác!', () => form.submit(), 'danger');">
+                <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
+                <button type="submit" class="btn" style="width: auto; background-color: #ef4444; color: white;">
+                    <i class="fa-solid fa-ban"></i> Hủy Hóa Đơn
+                </button>
+            </form>
+        </c:if>
+        <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 </div>
 
 <c:if test="${not empty msg}">
