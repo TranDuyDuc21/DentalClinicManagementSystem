@@ -488,5 +488,30 @@ VALUES (3, 1, 6, '2026-06-06 10:00:00', 'Done', 'Phone', 2);
 INSERT INTO visits (appointment_id, patient_id, doctor_id, visit_date, symptoms, diagnosis, clinical_notes, is_concluded)
 VALUES (LAST_INSERT_ID(), 3, 1, '2026-06-06 10:15:00', 'Răng sứt mẻ', 'Mẻ răng cửa', 'Bọc sứ', TRUE);
 
-SET @visitId3 = LAST_INSERT_ID();
 
+
+-- 5. Add Sample Data for employee_schedules (for pagination test)
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-17', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Doctor' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-17', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Doctor' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-18', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Doctor' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-18', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Doctor' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-19', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Receptionist' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-19', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Receptionist' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-20', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Receptionist' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-20', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Receptionist' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-21', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-21', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-22', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;
+INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT u.user_id, '2026-06-22', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;

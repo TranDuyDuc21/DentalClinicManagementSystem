@@ -11,7 +11,7 @@ import java.util.List;
 
 public class EmployeeScheduleDAO {
 
-    public List<EmployeeSchedule> getAllSchedules(Integer userId, Date startDate, Date endDate) {
+    public List<EmployeeSchedule> getAllSchedules(Integer userId, Date startDate, Date endDate, int offset, int limit) {
         List<EmployeeSchedule> list = new ArrayList<>();
         String sql = "SELECT es.*, u.full_name as employeeName, r.role_name " +
                      "FROM employee_schedules es " +
@@ -29,7 +29,7 @@ public class EmployeeScheduleDAO {
             sql += " AND es.work_date <= ? ";
         }
         
-        sql += " ORDER BY es.work_date ASC, es.start_time ASC";
+        sql += " ORDER BY es.work_date ASC, es.start_time ASC LIMIT ? OFFSET ?";
 
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -38,6 +38,8 @@ public class EmployeeScheduleDAO {
             if (userId != null) ps.setInt(paramIndex++, userId);
             if (startDate != null) ps.setDate(paramIndex++, startDate);
             if (endDate != null) ps.setDate(paramIndex++, endDate);
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -48,6 +50,37 @@ public class EmployeeScheduleDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public int getTotalSchedules(Integer userId, Date startDate, Date endDate) {
+        String sql = "SELECT COUNT(*) FROM employee_schedules es WHERE 1=1 ";
+        if (userId != null) {
+            sql += " AND es.user_id = ? ";
+        }
+        if (startDate != null) {
+            sql += " AND es.work_date >= ? ";
+        }
+        if (endDate != null) {
+            sql += " AND es.work_date <= ? ";
+        }
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            int paramIndex = 1;
+            if (userId != null) ps.setInt(paramIndex++, userId);
+            if (startDate != null) ps.setDate(paramIndex++, startDate);
+            if (endDate != null) ps.setDate(paramIndex++, endDate);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public EmployeeSchedule getScheduleByEmployeeAndDateAndShift(int userId, Date workDate, String shift) {

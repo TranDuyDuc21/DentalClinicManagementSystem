@@ -39,7 +39,7 @@ public class AppointmentService {
         java.sql.Date workDate = java.sql.Date.valueOf(localDateTime.toLocalDate());
         java.sql.Time apptTime = java.sql.Time.valueOf(localDateTime.toLocalTime());
         
-        java.util.List<com.mycompany.dentalclinicmanagementsystem.model.EmployeeSchedule> schedules = employeeScheduleDAO.getAllSchedules(userId, workDate, workDate);
+        java.util.List<com.mycompany.dentalclinicmanagementsystem.model.EmployeeSchedule> schedules = employeeScheduleDAO.getAllSchedules(userId, workDate, workDate, 0, 100);
         if (schedules.isEmpty()) {
             return new BookingResult(false, "Bác sĩ chưa có lịch làm việc vào ngày này.");
         }

@@ -1,11 +1,26 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="pagination" tagdir="/WEB-INF/tags" %>
 <c:set var="currentPage" value="schedules" scope="request" />
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp">
     <jsp:param name="pageTitle" value="Lịch Làm Việc" />
 </jsp:include>
+
+<style>
+.status-label {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.status-info { background: #e0f2fe; color: #0284c7; }
+.status-warning { background: #fef08a; color: #b45309; }
+.status-success { background: #dcfce7; color: #16a34a; }
+.status-error { background: #fee2e2; color: #ef4444; }
+</style>
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-calendar-days"></i> Lịch Làm Việc</h2>
@@ -18,7 +33,7 @@
 
 <jsp:include page="/WEB-INF/views/components/messages.jsp" />
 
-<div class="card mb-4" style="padding: 20px;">
+<div class="card" style="padding: 20px; margin-bottom: 24px;">
     <form action="${pageContext.request.contextPath}/schedules" method="GET" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
         <c:if test="${sessionScope.loggedUser.roleName != 'Doctor' && sessionScope.loggedUser.roleName != 'Technician'}">
             <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
@@ -39,7 +54,7 @@
             <label class="form-label">Đến ngày</label>
             <input type="date" name="endDate" class="form-control" value="${endDate}">
         </div>
-        <button type="submit" class="btn btn-outline-primary" style="width: auto; height: 42px;"><i class="fa-solid fa-filter"></i> Lọc</button>
+        <button type="submit" class="btn btn-primary" style="width: auto; height: 42px; padding: 0 20px;"><i class="fa-solid fa-filter"></i> Lọc</button>
     </form>
 </div>
 
@@ -83,13 +98,13 @@
                                 </td>
                                 <td style="padding: 15px 12px;">
                                     <c:choose>
-                                        <c:when test="${item.shift == 'Morning'}"><span class="badge badge-info">Sáng</span></c:when>
-                                        <c:when test="${item.shift == 'Afternoon'}"><span class="badge badge-warning">Chiều</span></c:when>
+                                        <c:when test="${item.shift == 'Morning'}"><span class="status-label status-info">Sáng</span></c:when>
+                                        <c:when test="${item.shift == 'Afternoon'}"><span class="status-label status-warning">Chiều</span></c:when>
                                     </c:choose>
                                 </td>
                                 <td style="padding: 15px 12px;">
                                     <c:choose>
-                                        <c:when test="${item.isDayOff}">-</c:when>
+                                        <c:when test="${item.dayOff}">-</c:when>
                                         <c:otherwise>
                                             <fmt:formatDate value="${item.startTime}" pattern="HH:mm" /> - <fmt:formatDate value="${item.endTime}" pattern="HH:mm" />
                                         </c:otherwise>
@@ -100,24 +115,24 @@
                                 </td>
                                 <td style="padding: 15px 12px;">
                                     <c:choose>
-                                        <c:when test="${item.isDayOff}">
-                                            <span class="badge badge-error">Ngày nghỉ</span>
+                                        <c:when test="${item.dayOff}">
+                                            <span class="status-label status-error">Ngày nghỉ</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge badge-success">Làm việc</span>
+                                            <span class="status-label status-success">Làm việc</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
                                 <c:if test="${sessionScope.loggedUser.roleName == 'Admin'}">
                                     <td style="padding: 15px 12px; text-align: right;">
-                                        <button class="btn btn-outline-primary" style="padding: 6px 12px; font-size: 0.85rem;" 
-                                                onclick="openEditModal(${item.scheduleId}, ${item.userId}, '${item.workDate}', '${item.shift}', '${item.startTime}', '${item.endTime}', ${item.maxPatients}, ${item.isDayOff})">
+                                        <button class="btn btn-outline-secondary" style="width: auto; padding: 6px 12px; font-size: 0.85rem;" 
+                                                onclick="openEditModal(${item.scheduleId}, ${item.userId}, '${item.workDate}', '${item.shift}', '${item.startTime}', '${item.endTime}', ${item.maxPatients}, ${item.dayOff})">
                                             Sửa
                                         </button>
                                         <form action="${pageContext.request.contextPath}/schedules" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa lịch trực này?');">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="scheduleId" value="${item.scheduleId}">
-                                            <button type="submit" class="btn" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 6px 12px;"><i class="fa-solid fa-trash"></i></button>
+                                            <button type="submit" class="btn-icon" style="color: var(--error);"><i class="fa-solid fa-trash"></i></button>
                                         </form>
                                     </td>
                                 </c:if>
@@ -129,6 +144,13 @@
         </table>
     </div>
 </div>
+
+<c:if test="${totalPages >= 1}">
+    <pagination:pagination 
+        activePage="${activePage}" 
+        totalPages="${totalPages}" 
+        urlParams="&userId=${param.userId != null ? param.userId : ''}&startDate=${param.startDate != null ? param.startDate : ''}&endDate=${param.endDate != null ? param.endDate : ''}" />
+</c:if>
 
 <c:if test="${sessionScope.loggedUser.roleName == 'Admin'}">
 <!-- Modal Schedule -->
@@ -147,7 +169,7 @@
                 <select name="userId" id="modalUserId" class="form-control" required>
                     <option value="">-- Chọn nhân viên --</option>
                     <c:forEach var="emp" items="${employees}">
-                        <option value="${emp.userId}">${emp.fullName} - ${emp.roleName}</option>
+                        <option value="${emp.userId}" data-role="${emp.roleName}">${emp.fullName} - ${emp.roleName}</option>
                     </c:forEach>
                 </select>
             </div>
@@ -176,7 +198,7 @@
                 </div>
             </div>
 
-            <div class="form-group mb-3">
+            <div class="form-group mb-3" id="maxPatientsContainer">
                 <label class="form-label">Số Lượng Bệnh Nhân Tối Đa</label>
                 <input type="number" name="maxPatients" id="modalMaxPatients" class="form-control" min="0" value="0" placeholder="0 = không giới hạn">
             </div>
@@ -195,6 +217,22 @@
 </div>
 
 <script>
+    document.getElementById('modalUserId').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var role = selectedOption.getAttribute('data-role');
+        toggleMaxPatientsByRole(role);
+    });
+
+    function toggleMaxPatientsByRole(role) {
+        var container = document.getElementById('maxPatientsContainer');
+        if (role === 'Receptionist' || role === 'Technician') {
+            container.style.display = 'none';
+            document.getElementById('modalMaxPatients').value = 0;
+        } else {
+            container.style.display = 'block';
+        }
+    }
+
     function openAddModal() {
         document.getElementById('modalTitle').innerText = 'Phân Công Lịch Mới';
         document.getElementById('modalAction').value = 'add';
@@ -208,6 +246,8 @@
         document.getElementById('modalMaxPatients').value = '0';
         document.getElementById('modalIsDayOff').checked = false;
         
+        toggleMaxPatientsByRole(''); // Show by default or hide if no role
+
         document.getElementById('scheduleModal').style.display = 'flex';
     }
 
@@ -227,6 +267,17 @@
         document.getElementById('modalMaxPatients').value = maxPatients;
         document.getElementById('modalIsDayOff').checked = isDayOff;
         
+        // Find role from select option
+        var select = document.getElementById('modalUserId');
+        var role = '';
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value == userId) {
+                role = select.options[i].getAttribute('data-role');
+                break;
+            }
+        }
+        toggleMaxPatientsByRole(role);
+
         document.getElementById('scheduleModal').style.display = 'flex';
     }
 

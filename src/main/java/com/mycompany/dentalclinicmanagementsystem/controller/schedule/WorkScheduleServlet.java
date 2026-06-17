@@ -84,14 +84,34 @@ public class WorkScheduleServlet extends HttpServlet {
             // Invalid date format
         }
 
-        List<EmployeeSchedule> schedules = employeeScheduleDAO.getAllSchedules(filterUserId, startDate, endDate);
+        // Pagination parameters
+        int page = 1;
+        int pageSize = 10;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageParam);
+                if (page < 1) page = 1;
+            } catch (NumberFormatException e) {
+                // Ignore invalid page param
+            }
+        }
+        int offset = (page - 1) * pageSize;
+
+        List<EmployeeSchedule> schedules = employeeScheduleDAO.getAllSchedules(filterUserId, startDate, endDate, offset, pageSize);
+        int totalRecords = employeeScheduleDAO.getTotalSchedules(filterUserId, startDate, endDate);
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
+
         List<User> employees = userDAO.getAllEmployees();
 
         request.setAttribute("schedules", schedules);
         request.setAttribute("employees", employees);
-        request.setAttribute("startDate", startDate);
-        request.setAttribute("endDate", endDate);
+        request.setAttribute("startDate", startDateStr); // Return strings to keep them in filter inputs
+        request.setAttribute("endDate", endDateStr);
         request.setAttribute("filterUserId", filterUserId);
+        
+        request.setAttribute("activePage", page);
+        request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/WEB-INF/views/schedule/schedule-list.jsp").forward(request, response);
     }

@@ -142,7 +142,7 @@ public class UserDAO {
 
     public List<User> getAllEmployees() {
         List<User> employees = new ArrayList<>();
-        String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name != 'Customer' ORDER BY u.created_at DESC";
+        String sql = "SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name NOT IN ('Customer', 'Admin') ORDER BY u.created_at DESC";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
