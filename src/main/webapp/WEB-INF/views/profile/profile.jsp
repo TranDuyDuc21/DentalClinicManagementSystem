@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <c:set var="pageTitle" value="Hồ Sơ Cá Nhân" />
-<c:set var="currentPage" value="profile" />
+<c:set var="currentPage" value="profile" scope="request" />
 <jsp:include page="/WEB-INF/views/layout/header.jsp" />
 
 <div class="page-header mb-4" style="margin-bottom: 20px;">
