@@ -55,7 +55,7 @@
                     <label for="password" class="form-label">Mật khẩu <span style="color: var(--error);">*</span></label>
                     <div style="position: relative;">
                         <input type="password" id="password" name="password" class="form-control" 
-                               required minlength="6"
+                               required minlength="6" pattern="^\S+$" title="Mật khẩu không được chứa khoảng trắng"
                                placeholder="Mật khẩu ít nhất 6 ký tự" style="padding-right: 40px;">
                         <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
                             const passwordInput = document.getElementById('password');
@@ -76,7 +76,7 @@
                     <label for="confirmPassword" class="form-label">Xác nhận mật khẩu <span style="color: var(--error);">*</span></label>
                     <div style="position: relative;">
                         <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" 
-                               required data-match="password"
+                               required data-match="password" pattern="^\S+$" title="Mật khẩu không được chứa khoảng trắng"
                                placeholder="Nhập lại mật khẩu ở trên" style="padding-right: 40px;">
                         <i class="fa-solid fa-eye" id="toggleConfirmPassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
                             const passwordInput = document.getElementById('confirmPassword');

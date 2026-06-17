@@ -87,7 +87,7 @@
             <div class="form-group" style="margin-bottom: 15px;">
                 <label for="newPassword" class="form-label">Mật khẩu mới <span style="color: var(--error);">*</span></label>
                 <div style="position: relative;">
-                    <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6" style="padding-right: 40px;">
+                    <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="6" pattern="^\S+$" title="Mật khẩu không được chứa khoảng trắng" style="padding-right: 40px;">
                     <i class="fa-regular fa-eye toggle-password" data-target="newPassword" style="position: absolute; right: 15px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;"></i>
                 </div>
                 <div class="password-strength mt-2" style="display: none;">
@@ -99,7 +99,7 @@
             <div class="form-group" style="margin-bottom: 25px;">
                 <label for="confirmPassword" class="form-label">Xác nhận mật khẩu mới <span style="color: var(--error);">*</span></label>
                 <div style="position: relative;">
-                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required data-match="newPassword" style="padding-right: 40px;">
+                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required data-match="newPassword" pattern="^\S+$" title="Mật khẩu không được chứa khoảng trắng" style="padding-right: 40px;">
                     <i class="fa-regular fa-eye toggle-password" data-target="confirmPassword" style="position: absolute; right: 15px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;"></i>
                 </div>
             </div>
