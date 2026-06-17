@@ -29,6 +29,12 @@
             <option value="Card" ${param.paymentMethod == 'Card' ? 'selected' : ''}>Thẻ</option>
         </select>
     </div>
+    <div style="width: 150px;">
+        <input type="number" name="minAmount" class="form-control" placeholder="Giá từ (VND)" value="${minAmount}" min="0" style="width: 100%; box-sizing: border-box;">
+    </div>
+    <div style="width: 150px;">
+        <input type="number" name="maxAmount" class="form-control" placeholder="Đến giá (VND)" value="${maxAmount}" min="0" style="width: 100%; box-sizing: border-box;">
+    </div>
 </t:searchFilter>
 
 <div class="card" style="padding: 20px;">

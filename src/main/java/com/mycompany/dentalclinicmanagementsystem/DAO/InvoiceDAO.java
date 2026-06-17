@@ -9,7 +9,7 @@ import java.util.List;
 
 public class InvoiceDAO extends DBContext {
 
-    public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr, int offset, int limit) {
+    public List<Invoice> getAllInvoices(String status, String paymentMethod, String searchStr, Double minAmount, Double maxAmount, int offset, int limit) {
         List<Invoice> list = new ArrayList<>();
         String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName, " +
                      "(SELECT GROUP_CONCAT(DISTINCT py.payment_method SEPARATOR ', ') FROM payments py WHERE py.invoice_id = i.invoice_id) as paymentMethods " +
@@ -22,14 +22,20 @@ public class InvoiceDAO extends DBContext {
             sql += " AND i.status = ? ";
         }
         
-        // paymentMethod filtering might need join with payments table or just basic filtering if we simplify.
-        // Actually, we can filter by paymentMethod using EXISTS if needed, but let's stick to status and search first.
         if (paymentMethod != null && !paymentMethod.isEmpty()) {
             sql += " AND EXISTS (SELECT 1 FROM payments py WHERE py.invoice_id = i.invoice_id AND py.payment_method = ?) ";
         }
 
         if (searchStr != null && !searchStr.isEmpty()) {
             sql += " AND (i.invoice_code LIKE ? OR p.full_name LIKE ? OR p.phone_number LIKE ?) ";
+        }
+        
+        if (minAmount != null) {
+            sql += " AND i.total_amount >= ? ";
+        }
+        
+        if (maxAmount != null) {
+            sql += " AND i.total_amount <= ? ";
         }
         
         sql += " ORDER BY i.created_at DESC ";
@@ -50,6 +56,12 @@ public class InvoiceDAO extends DBContext {
                 ps.setString(paramIndex++, likeSearch);
                 ps.setString(paramIndex++, likeSearch);
             }
+            if (minAmount != null) {
+                ps.setDouble(paramIndex++, minAmount);
+            }
+            if (maxAmount != null) {
+                ps.setDouble(paramIndex++, maxAmount);
+            }
             ps.setInt(paramIndex++, limit);
             ps.setInt(paramIndex++, offset);
 
@@ -65,7 +77,7 @@ public class InvoiceDAO extends DBContext {
         return list;
     }
 
-    public int getTotalInvoices(String status, String paymentMethod, String searchStr) {
+    public int getTotalInvoices(String status, String paymentMethod, String searchStr, Double minAmount, Double maxAmount) {
         String sql = "SELECT COUNT(*) " +
                      "FROM invoices i " +
                      "JOIN patients p ON i.patient_id = p.patient_id " +
@@ -79,6 +91,12 @@ public class InvoiceDAO extends DBContext {
         }
         if (searchStr != null && !searchStr.isEmpty()) {
             sql += " AND (i.invoice_code LIKE ? OR p.full_name LIKE ? OR p.phone_number LIKE ?) ";
+        }
+        if (minAmount != null) {
+            sql += " AND i.total_amount >= ? ";
+        }
+        if (maxAmount != null) {
+            sql += " AND i.total_amount <= ? ";
         }
 
         try (Connection connection = DBContext.getConnection();
@@ -95,6 +113,12 @@ public class InvoiceDAO extends DBContext {
                 ps.setString(paramIndex++, likeSearch);
                 ps.setString(paramIndex++, likeSearch);
                 ps.setString(paramIndex++, likeSearch);
+            }
+            if (minAmount != null) {
+                ps.setDouble(paramIndex++, minAmount);
+            }
+            if (maxAmount != null) {
+                ps.setDouble(paramIndex++, maxAmount);
             }
 
             try (ResultSet rs = ps.executeQuery()) {
