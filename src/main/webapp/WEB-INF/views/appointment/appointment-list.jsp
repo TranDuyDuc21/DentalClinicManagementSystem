@@ -73,7 +73,7 @@
                                 <c:choose>
                                     <c:when test="${sessionScope.loggedUser.roleName == 'Customer'}">
                                         <c:if test="${appt.status == 'New' || appt.status == 'Waiting'}">
-                                            <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?');">
+                                            <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn hủy lịch hẹn này?', () => form.submit(), 'danger');">
                                                 <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
                                                 <input type="hidden" name="action" value="cancel">
                                                 <button type="submit" class="btn btn-outline-secondary" style="padding: 6px 12px; font-size: 0.85rem; width: auto; color: var(--error); border-color: var(--error);">
@@ -93,7 +93,7 @@
                                                         <i class="fa-solid fa-clipboard-check"></i> Check-in
                                                     </button>
                                                 </form>
-                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="return confirm('Xác nhận hủy?');">
+                                                <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Xác nhận hủy?', () => form.submit(), 'danger');">
                                                     <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
                                                     <input type="hidden" name="action" value="cancel">
                                                     <button type="submit" class="btn btn-outline-secondary" style="padding: 6px 10px; min-width: auto; width: auto; color: var(--error); border-color: transparent;" title="Hủy">

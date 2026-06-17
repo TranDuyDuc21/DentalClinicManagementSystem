@@ -129,7 +129,7 @@
                                                 onclick="openEditModal(${item.scheduleId}, ${item.userId}, '${item.workDate}', '${item.shift}', '${item.startTime}', '${item.endTime}', ${item.maxPatients}, ${item.dayOff})">
                                             Sửa
                                         </button>
-                                        <form action="${pageContext.request.contextPath}/schedules" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa lịch trực này?');">
+                                        <form action="${pageContext.request.contextPath}/schedules" method="POST" style="display:inline;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc muốn xóa lịch trực này?', () => form.submit(), 'danger');">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="scheduleId" value="${item.scheduleId}">
                                             <button type="submit" class="btn-icon" style="color: var(--error);"><i class="fa-solid fa-trash"></i></button>

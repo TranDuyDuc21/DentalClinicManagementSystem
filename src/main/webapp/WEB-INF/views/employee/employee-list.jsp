@@ -93,10 +93,10 @@
                                 
                                 <c:choose>
                                     <c:when test="${emp.userId != sessionScope.loggedUser.userId}">
-                                        <form action="${pageContext.request.contextPath}/employees/toggle" method="POST" style="display: inline; margin: 0;">
+                                        <form action="${pageContext.request.contextPath}/employees/toggle" method="POST" style="display: inline; margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn ${emp.active ? 'khoá' : 'mở khoá'} tài khoản này?', () => form.submit(), '${emp.active ? 'danger' : 'warning'}');">
                                             <input type="hidden" name="id" value="${emp.userId}">
                                             <input type="hidden" name="status" value="${!emp.active}">
-                                            <button type="submit" class="btn" style="padding: 6px 12px; font-size: 0.85rem; min-width: auto; background-color: ${emp.active ? 'var(--error)' : 'var(--success)'}; color: white; border: none;" onclick="return confirm('Bạn có chắc chắn muốn ${emp.active ? 'khoá' : 'mở khoá'} tài khoản này?');">
+                                            <button type="submit" class="btn" style="padding: 6px 12px; font-size: 0.85rem; min-width: auto; background-color: ${emp.active ? 'var(--error)' : 'var(--success)'}; color: white; border: none;">
                                                 <i class="fa-solid ${emp.active ? 'fa-lock' : 'fa-unlock'}"></i> 
                                                 ${emp.active ? 'Khoá' : 'Mở'}
                                             </button>
