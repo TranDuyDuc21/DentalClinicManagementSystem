@@ -3,9 +3,9 @@
 <%@ attribute name="searchPlaceholder" required="true" type="java.lang.String" %>
 <%@ attribute name="searchValue" required="false" type="java.lang.String" %>
 
-<div class="search-filter-container" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
-    <form action="${actionUrl}" method="GET" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin: 0;">
-        <div style="flex: 1; min-width: 200px; max-width: 350px; position: relative;">
+<div class="search-filter-container" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color); overflow-x: auto;">
+    <form action="${actionUrl}" method="GET" style="display: flex; gap: 15px; align-items: center; flex-wrap: nowrap; margin: 0; min-width: min-content;">
+        <div style="flex: 1; min-width: 200px; max-width: 500px; position: relative;">
             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
             <input type="text" name="search" value="${searchValue}" placeholder="${searchPlaceholder}" class="form-control" style="padding-left: 35px; width: 100%; box-sizing: border-box;" />
         </div>

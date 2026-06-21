@@ -27,9 +27,18 @@ public class AppointmentListServlet extends HttpServlet {
 
         String searchStr = request.getParameter("search");
         String status = request.getParameter("status");
+        String filterDate = request.getParameter("filterDate");
+        String doctorIdStr = request.getParameter("doctorId");
         
         if ("All".equalsIgnoreCase(status)) {
             status = null;
+        }
+        
+        Integer doctorIdFilter = null;
+        if (doctorIdStr != null && !doctorIdStr.isEmpty()) {
+            try {
+                doctorIdFilter = Integer.parseInt(doctorIdStr);
+            } catch (NumberFormatException e) {}
         }
 
         String pageStr = request.getParameter("page");
@@ -46,15 +55,22 @@ public class AppointmentListServlet extends HttpServlet {
         int offset = (page - 1) * limit;
 
         AppointmentService service = new AppointmentService();
-        List<Appointment> appointments = service.getAppointmentsForUser(loggedUser, status, searchStr, offset, limit);
-        int totalAppointments = service.getTotalAppointmentsForUser(loggedUser, status, searchStr);
+        List<Appointment> appointments = service.getAppointmentsForUser(loggedUser, status, searchStr, doctorIdFilter, filterDate, offset, limit);
+        int totalAppointments = service.getTotalAppointmentsForUser(loggedUser, status, searchStr, doctorIdFilter, filterDate);
         int totalPages = (int) Math.ceil((double) totalAppointments / limit);
+
+        com.mycompany.dentalclinicmanagementsystem.dao.DoctorDAO doctorDAO = new com.mycompany.dentalclinicmanagementsystem.dao.DoctorDAO();
+        request.setAttribute("doctors", doctorDAO.getAllActiveDoctors());
 
         request.setAttribute("appointments", appointments);
         request.setAttribute("pageNumber", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentStatus", status != null ? status : "All");
         
-        request.getRequestDispatcher("/WEB-INF/views/appointment/appointment-list.jsp").forward(request, response);
+        if ("Customer".equalsIgnoreCase(loggedUser.getRoleName())) {
+            request.getRequestDispatcher("/WEB-INF/views/appointment/appointment-list-customer.jsp").forward(request, response);
+        } else {
+            request.getRequestDispatcher("/WEB-INF/views/appointment/appointment-list.jsp").forward(request, response);
+        }
     }
 }
