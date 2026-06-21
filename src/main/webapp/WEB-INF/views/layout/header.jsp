@@ -9,6 +9,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/design-system.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/customer-premium.css">
 </head>
 <c:set var="isCustomer" value="${sessionScope.loggedUser != null && sessionScope.loggedUser.roleName == 'Customer'}" />
 <c:set var="isStaff" value="${sessionScope.loggedUser != null && sessionScope.loggedUser.roleName != 'Customer'}" />
@@ -43,7 +44,7 @@
                     </c:when>
                     <c:otherwise>
                         <div style="display: flex; align-items: center; gap: 15px; margin-left: 10px;">
-                            <a href="${pageContext.request.contextPath}/login" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--primary); border: 2px solid var(--primary); white-space: nowrap; transition: all 0.3s; display: inline-block;">Đăng Nhập</a>
+                            <a href="${pageContext.request.contextPath}/login" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--primary); white-space: nowrap; transition: all 0.3s; display: inline-block;">Đăng Nhập</a>
                             <a href="${pageContext.request.contextPath}/register" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; color: white; background: linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%); border: 2px solid transparent; white-space: nowrap; transition: all 0.3s; box-shadow: 0 4px 14px 0 rgba(2, 132, 199, 0.39); display: inline-block;">Đăng Ký</a>
                         </div>
                     </c:otherwise>

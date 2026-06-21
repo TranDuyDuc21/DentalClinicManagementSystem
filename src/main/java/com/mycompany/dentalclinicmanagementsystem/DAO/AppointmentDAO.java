@@ -266,17 +266,45 @@ public class AppointmentDAO extends DBContext {
     }
 
     public boolean checkConflict(int doctorId, Timestamp startTime) {
-        // Simple logic: assume each appointment is 30 mins. We check if there's an appointment within +/- 30 mins for the same doctor.
-        String sql = "SELECT 1 FROM appointments WHERE doctor_id = ? AND status NOT IN ('Done', 'Cancelled') " +
-                     "AND scheduled_datetime >= DATE_SUB(?, INTERVAL 29 MINUTE) " +
-                     "AND scheduled_datetime <= DATE_ADD(?, INTERVAL 29 MINUTE)";
+        // Default to 30 mins if not provided
+        return checkConflict(doctorId, startTime, 30);
+    }
+
+    public boolean checkConflict(int doctorId, Timestamp startTime, int durationMinutes) {
+        // Check if there's any appointment that overlaps with the given [startTime, startTime + durationMinutes)
+        // Assume existing appointments are roughly 30 mins if we don't join with services.
+        // For accurate checking, we should see if [newStart, newEnd] overlaps with [existStart, existEnd]
+        // Overlap condition: newStart < existEnd AND newEnd > existStart
+        // Since we don't store existEnd directly in appointments (only scheduled_datetime),
+        // we'll join with services to get the duration of existing appointments.
+        
+        String sql = "SELECT a.scheduled_datetime, s.estimated_minutes " +
+                     "FROM appointments a " +
+                     "LEFT JOIN services s ON a.service_id = s.service_id " +
+                     "WHERE a.doctor_id = ? AND a.status NOT IN ('Done', 'Cancelled') " +
+                     "AND DATE(a.scheduled_datetime) = DATE(?)";
+                     
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, doctorId);
             ps.setTimestamp(2, startTime);
-            ps.setTimestamp(3, startTime);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs.next(); // true if conflict exists
+                long newStartMillis = startTime.getTime();
+                long newEndMillis = newStartMillis + (durationMinutes * 60 * 1000L);
+                
+                while (rs.next()) {
+                    Timestamp existStart = rs.getTimestamp("scheduled_datetime");
+                    int existDuration = rs.getInt("estimated_minutes");
+                    if (existDuration <= 0) existDuration = 30; // default
+                    
+                    long existStartMillis = existStart.getTime();
+                    long existEndMillis = existStartMillis + (existDuration * 60 * 1000L);
+                    
+                    // Check overlap
+                    if (newStartMillis < existEndMillis && newEndMillis > existStartMillis) {
+                        return true; // Conflict found
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
