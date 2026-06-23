@@ -27,7 +27,7 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        List<Service> services = serviceDAO.getAllServices(null, "true", 0, 10); // Display top 10 services
+        List<Service> services = serviceDAO.getAllServices(null, "true", 0, 3); // Display top 3 services
         List<Doctor> doctors = doctorDAO.getAllActiveDoctors(); // Display active doctors
 
         request.setAttribute("services", services);

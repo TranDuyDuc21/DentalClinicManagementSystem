@@ -915,8 +915,12 @@ body {
 .search-filter-container .form-control {
     border-radius: 12px !important;
     border: 2px solid #e2e8f0 !important;
-    padding: 12px 12px 12px 40px !important;
+    padding: 10px 15px !important;
     transition: all 0.3s ease !important;
+}
+
+.search-filter-container input[name="search"].form-control {
+    padding-left: 40px !important;
 }
 
 .search-filter-container .form-control:focus {

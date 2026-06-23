@@ -53,7 +53,7 @@
         </div>
     </header>
     
-    <div class="customer-main-content" style="flex-grow: 1; display: flex; flex-direction: column; ${not empty currentPage and currentPage != 'home' ? 'padding: 30px 20px; max-width: 1200px; margin: 40px auto; width: 100%;' : 'width: 100%;'}">
+    <div class="customer-main-content" style="flex-grow: 1; display: flex; flex-direction: column; ${not empty currentPage and currentPage != 'home' ? 'padding: 30px 20px; max-width: 1200px; margin: 0; width: 100%;' : 'width: 100%;'}">
 </c:if>
 
 <c:if test="${isStaff}">
