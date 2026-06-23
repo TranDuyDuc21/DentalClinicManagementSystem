@@ -602,3 +602,28 @@ SET @vnpayInvoiceId = LAST_INSERT_ID();
 
 INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total)
 VALUES (@vnpayInvoiceId, 1, 'Trám răng thẩm mỹ', 2, 2500000, 5000000);
+
+-- Thêm thuốc mẫu
+INSERT INTO medications (name, unit, description) VALUES ('Paracetamol 500mg', 'Viên', 'Giảm đau, hạ sốt');
+SET @med1 = LAST_INSERT_ID();
+INSERT INTO medications (name, unit, description) VALUES ('Amoxicillin 500mg', 'Viên', 'Kháng sinh');
+SET @med2 = LAST_INSERT_ID();
+
+-- Thêm đơn thuốc cho VNPay Tester
+INSERT INTO prescriptions (visit_id) VALUES (@vnpayVisitId);
+SET @vnpayPrescriptionId = LAST_INSERT_ID();
+
+INSERT INTO prescription_items (prescription_id, medication_id, dosage, duration, usage_instruction)
+VALUES (@vnpayPrescriptionId, @med1, '1 viên/lần, 2 lần/ngày', '5 ngày', 'Uống sau khi ăn no');
+INSERT INTO prescription_items (prescription_id, medication_id, dosage, duration, usage_instruction)
+VALUES (@vnpayPrescriptionId, @med2, '1 viên/lần, 2 lần/ngày', '7 ngày', 'Uống sau khi ăn no, không bỏ cữ');
+
+-- Thêm kế hoạch điều trị cho VNPay Tester
+INSERT INTO treatment_plans (visit_id, patient_id, title)
+VALUES (@vnpayVisitId, @vnpayPatientId, 'Kế hoạch trám răng và theo dõi tủy');
+SET @vnpayPlanId = LAST_INSERT_ID();
+
+INSERT INTO treatment_steps (plan_id, step_order, description, estimated_cost, next_appointment_date, status)
+VALUES (@vnpayPlanId, 1, 'Trám răng cửa hàm trên', 5000000, NULL, 'Done');
+INSERT INTO treatment_steps (plan_id, step_order, description, estimated_cost, next_appointment_date, status)
+VALUES (@vnpayPlanId, 2, 'Tái khám kiểm tra tủy', 0, '2026-07-02', 'Pending');
