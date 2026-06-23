@@ -35,7 +35,7 @@ public class InvoiceDetailServlet extends HttpServlet {
                     com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO patientDAO = new com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO();
                     com.mycompany.dentalclinicmanagementsystem.model.Patient patient = patientDAO.getPatientById(invoice.getPatientId());
                     if (patient == null || patient.getUserId() == null || !patient.getUserId().equals(loggedUser.getUserId())) {
-                        response.sendRedirect(request.getContextPath() + "/customer-invoices");
+                        response.sendRedirect(request.getContextPath() + "/appointments");
                         return;
                     }
                 }

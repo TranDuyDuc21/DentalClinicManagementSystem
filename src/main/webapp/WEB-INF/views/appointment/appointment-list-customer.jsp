@@ -16,9 +16,9 @@
 <style>
     /* Styling cho Layout Danh sách Lịch hẹn */
     .appointment-page-container {
-        max-width: 100%;
-        margin: 40px auto;
-        padding: 0 20px;
+        width: 100%;
+        margin: 40px 0;
+        padding: 0;
     }
     
     .page-header {

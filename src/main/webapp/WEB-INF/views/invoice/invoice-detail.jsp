@@ -23,7 +23,7 @@
         </c:if>
         <c:choose>
             <c:when test="${sessionScope.loggedUser.roleName == 'Customer'}">
-                <a href="${pageContext.request.contextPath}/customer-invoices" class="btn btn-outline-secondary" style="width: auto;">
+                <a href="${pageContext.request.contextPath}/appointments" class="btn btn-outline-secondary" style="width: auto;">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
             </c:when>

@@ -32,7 +32,7 @@
                 <c:choose>
                     <c:when test="${isCustomer}">
                         <a href="${pageContext.request.contextPath}/appointments" style="text-decoration: none; font-weight: 500; color: ${currentPage == 'appointments' ? 'var(--primary)' : 'var(--text-secondary)'};">Lịch Hẹn</a>
-                        <a href="${pageContext.request.contextPath}/customer-invoices" style="text-decoration: none; font-weight: 500; color: ${currentPage == 'customer-invoices' ? 'var(--primary)' : 'var(--text-secondary)'};">Hóa Đơn</a>
+
                         <a href="${pageContext.request.contextPath}/profile" style="text-decoration: none; font-weight: 500; color: ${currentPage == 'profile' ? 'var(--primary)' : 'var(--text-secondary)'};">Hồ Sơ</a>
                         
                         <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid #e2e8f0; padding-left: 20px; margin-left: 10px;">
@@ -54,7 +54,7 @@
         </div>
     </header>
     
-    <div class="customer-main-content" style="flex-grow: 1; display: flex; flex-direction: column; ${not empty currentPage and currentPage != 'home' ? 'padding: 30px 20px; max-width: 1200px; margin: 0 auto; width: 100%;' : 'width: 100%;'}">
+    <div class="customer-main-content" style="flex-grow: 1; display: flex; flex-direction: column; ${not empty currentPage and currentPage != 'home' ? 'padding: 30px 20px; max-width: 1600px; margin: 0 auto; width: 100%;' : 'width: 100%;'}">
 </c:if>
 
 <c:if test="${isStaff}">
