@@ -60,7 +60,7 @@
                                 <td style="padding: 12px; font-weight: 500; color: var(--primary); text-align: left;">${patient.patientCode}</td>
                                 <td style="padding: 12px; font-weight: 500; text-align: left;">
                                     ${patient.fullName}
-                                    <c:if test="${not empty patient.drugAllergies && patient.drugAllergies != 'Không' && patient.drugAllergies != 'không'}">
+                                    <c:if test="${sessionScope.loggedUser.roleName != 'Receptionist' && not empty patient.drugAllergies && patient.drugAllergies != 'Không' && patient.drugAllergies != 'không'}">
                                         <i class="fa-solid fa-triangle-exclamation" style="color: var(--error); margin-left: 5px;" title="Có dị ứng thuốc: ${patient.drugAllergies}"></i>
                                     </c:if>
                                 </td>
@@ -78,10 +78,22 @@
                                 <td style="padding: 12px; text-align: left; color: var(--text-secondary);">${empty patient.email ? '-' : patient.email}</td>
                                 <td style="padding: 12px; text-align: left;">
                                     <div style="display: flex; gap: 15px; justify-content: flex-start; align-items: center;">
-                                        <!-- Tạm thời trỏ tới trang tạo, sau này ở UC18 sẽ trỏ tới trang chi tiết -->
                                         <a href="${pageContext.request.contextPath}/patients/detail?id=${patient.patientId}" style="color: var(--primary); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;" title="Xem chi tiết">
                                             <i class="fa-solid fa-eye"></i> Xem
                                         </a>
+                                        
+                                        <a href="${pageContext.request.contextPath}/patients/update?id=${patient.patientId}" style="color: #6366f1; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;" title="Sửa hồ sơ">
+                                            <i class="fa-solid fa-pen"></i> Sửa
+                                        </a>
+
+                                        <c:if test="${sessionScope.loggedUser.roleName == 'Admin' || sessionScope.loggedUser.roleName == 'Receptionist'}">
+                                            <form action="${pageContext.request.contextPath}/patients/delete" method="POST" style="margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn xoá hồ sơ bệnh nhân này không?', () => form.submit(), 'danger');">
+                                                <input type="hidden" name="id" value="${patient.patientId}">
+                                                <button type="submit" style="background: none; border: none; color: var(--error); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 0;" title="Xoá hồ sơ">
+                                                    <i class="fa-solid fa-trash"></i> Xoá
+                                                </button>
+                                            </form>
+                                        </c:if>
                                     </div>
                                 </td>
                             </tr>

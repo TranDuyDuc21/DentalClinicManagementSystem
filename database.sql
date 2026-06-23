@@ -433,7 +433,12 @@ INSERT INTO services (service_code, service_name, estimated_minutes, listed_pric
 -- Assuming patients 1, 2, 3 and doctors exist.
 -- Let's check doctors in database.sql: we have 'doctor_test' user (user_id=3)
 -- Insert a doctor profile if not exists
-INSERT IGNORE INTO doctors (user_id, specialty, license_no) VALUES (3, 'Nha khoa tổng quát', 'NKK-12345');
+INSERT IGNORE INTO doctors (user_id, specialty, license_no) VALUES 
+  (3, 'Nha khoa tổng quát', 'NKK-12345'),
+  (8, 'Chỉnh nha (Niềng răng)', 'NKK-12346'),
+  (9, 'Nha khoa phục hình (Implant)', 'NKK-12347'),
+  (10, 'Nha khoa trẻ em', 'NKK-12348'),
+  (11, 'Nha khoa thẩm mỹ', 'NKK-12349');
 
 -- Create an appointment
 INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by)
@@ -515,3 +520,59 @@ INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time,
 SELECT u.user_id, '2026-06-22', 'Morning', '08:00:00', '12:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;
 INSERT INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
 SELECT u.user_id, '2026-06-22', 'Afternoon', '13:00:00', '17:00:00', 5, FALSE FROM users u JOIN roles r ON u.role_id = r.role_id WHERE r.role_name = 'Technician' LIMIT 1;
+
+-- =====================================================
+-- 13. ADDITIONAL DATA FOR BOOKING TESTING (2026-06-21 TO 2026-07-01)
+-- =====================================================
+
+-- Lên lịch làm việc cho các bác sĩ (user_id: 3, 8, 9, 10, 11) từ 21/06/2026 đến 01/07/2026
+-- Bác sĩ 3 và 8 làm ca sáng
+INSERT IGNORE INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT user_id, d.date, 'Morning', '08:00:00', '12:00:00', 8, FALSE
+FROM users 
+CROSS JOIN (
+  SELECT '2026-06-21' as date UNION SELECT '2026-06-22' UNION SELECT '2026-06-23' UNION SELECT '2026-06-24' UNION SELECT '2026-06-25' UNION SELECT '2026-06-26' UNION SELECT '2026-06-27' UNION SELECT '2026-06-28' UNION SELECT '2026-06-29' UNION SELECT '2026-06-30' UNION SELECT '2026-07-01'
+) d
+WHERE user_id IN (3, 8);
+
+-- Bác sĩ 9, 10, 11 làm ca chiều
+INSERT IGNORE INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT user_id, d.date, 'Afternoon', '13:00:00', '17:00:00', 8, FALSE
+FROM users 
+CROSS JOIN (
+  SELECT '2026-06-21' as date UNION SELECT '2026-06-22' UNION SELECT '2026-06-23' UNION SELECT '2026-06-24' UNION SELECT '2026-06-25' UNION SELECT '2026-06-26' UNION SELECT '2026-06-27' UNION SELECT '2026-06-28' UNION SELECT '2026-06-29' UNION SELECT '2026-06-30' UNION SELECT '2026-07-01'
+) d
+WHERE user_id IN (9, 10, 11);
+
+-- Bác sĩ 3 làm thêm ca chiều các ngày chẵn
+INSERT IGNORE INTO employee_schedules (user_id, work_date, shift, start_time, end_time, max_patients, is_day_off)
+SELECT user_id, d.date, 'Afternoon', '13:00:00', '17:00:00', 8, FALSE
+FROM users 
+CROSS JOIN (
+  SELECT '2026-06-22' as date UNION SELECT '2026-06-24' UNION SELECT '2026-06-26' UNION SELECT '2026-06-28' UNION SELECT '2026-06-30'
+) d
+WHERE user_id = 3;
+
+-- Tạo một số lịch hẹn ảo (Appointments) trong khoảng thời gian này
+-- Chú ý: doctor_id tương ứng với bảng doctors (id 1->5 ứng với user_id 3,8,9,10,11)
+-- Giả sử patient 1, 2, 3
+
+INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime, status, booking_source, created_by) VALUES 
+(1, 1, 1, '2026-06-21 08:30:00', 'Waiting', 'Online', 2),
+(2, 1, 2, '2026-06-21 09:30:00', 'Waiting', 'Online', 2),
+(3, 1, 4, '2026-06-21 10:30:00', 'Waiting', 'Online', 2),
+
+(1, 2, 3, '2026-06-22 09:00:00', 'Waiting', 'Online', 2),
+(2, 2, 5, '2026-06-22 10:00:00', 'Waiting', 'Online', 2),
+
+(3, 3, 6, '2026-06-23 14:00:00', 'Waiting', 'Online', 2),
+(1, 3, 8, '2026-06-23 15:00:00', 'Waiting', 'Online', 2),
+
+(2, 4, 9, '2026-06-24 13:30:00', 'Waiting', 'Online', 2),
+(3, 4, 10, '2026-06-24 15:00:00', 'Waiting', 'Online', 2),
+
+(1, 5, 12, '2026-06-25 14:00:00', 'Waiting', 'Online', 2),
+(2, 5, 13, '2026-06-25 16:00:00', 'Waiting', 'Online', 2),
+
+(1, 1, 1, '2026-06-26 13:30:00', 'Waiting', 'Online', 2),
+(2, 1, 2, '2026-06-26 14:30:00', 'Waiting', 'Online', 2);

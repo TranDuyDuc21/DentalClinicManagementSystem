@@ -1,6 +1,6 @@
 package com.mycompany.dentalclinicmanagementsystem.controller.patient;
 
-import com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO;
+import com.mycompany.dentalclinicmanagementsystem.service.PatientService;
 import com.mycompany.dentalclinicmanagementsystem.model.Patient;
 import com.mycompany.dentalclinicmanagementsystem.model.User;
 
@@ -17,11 +17,11 @@ import java.sql.Date;
 @WebServlet("/patients/create")
 public class PatientCreateServlet extends HttpServlet {
 
-    private PatientDAO patientDAO;
+    private PatientService patientService;
 
     @Override
     public void init() throws ServletException {
-        patientDAO = new PatientDAO();
+        patientService = new PatientService();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PatientCreateServlet extends HttpServlet {
             boolean success;
             if (isUpdate) {
                 patient.setPatientId(Integer.parseInt(patientIdStr));
-                success = patientDAO.updatePatient(patient);
+                success = patientService.updatePatient(patient);
                 if (success) {
                     session.setAttribute("successMessage", "Đã cập nhật hồ sơ bệnh nhân thành công.");
                     response.sendRedirect(request.getContextPath() + "/patients"); 
@@ -84,14 +84,9 @@ public class PatientCreateServlet extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/patients/create");
                 }
             } else {
-                // Tự sinh mã bệnh nhân
-                String patientCode = patientDAO.generatePatientCode();
-                patient.setPatientCode(patientCode);
-
-                success = patientDAO.createPatient(patient);
-
+                success = patientService.createPatient(patient);
                 if (success) {
-                    session.setAttribute("successMessage", "Đã tạo hồ sơ bệnh nhân thành công với mã: " + patientCode);
+                    session.setAttribute("successMessage", "Đã tạo hồ sơ bệnh nhân thành công với mã: " + patient.getPatientCode());
                     response.sendRedirect(request.getContextPath() + "/patients"); 
                 } else {
                     session.setAttribute("errorMessage", "Đã xảy ra lỗi khi tạo hồ sơ. Vui lòng thử lại.");
