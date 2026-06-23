@@ -76,6 +76,63 @@ public class PatientApiServlet extends HttpServlet {
         out.flush();
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+
+        String fullName = request.getParameter("fullName");
+        String phone = request.getParameter("phone");
+        String dobStr = request.getParameter("dateOfBirth");
+        String gender = request.getParameter("gender");
+
+        if (fullName == null || fullName.trim().isEmpty() || phone == null || phone.trim().isEmpty()) {
+            out.print("{\"success\": false, \"message\": \"Tên và số điện thoại không được để trống\"}");
+            out.flush();
+            return;
+        }
+
+        Patient patient = new Patient();
+        patient.setPatientCode(patientDAO.generatePatientCode());
+        patient.setFullName(fullName.trim());
+        patient.setPhoneNumber(phone.trim());
+        
+        if (gender != null && !gender.trim().isEmpty()) {
+            patient.setGender(gender.trim());
+        } else {
+            patient.setGender("Other");
+        }
+
+        if (dobStr != null && !dobStr.trim().isEmpty()) {
+            try {
+                java.util.Date parsedDate = new SimpleDateFormat("yyyy-MM-dd").parse(dobStr);
+                patient.setDateOfBirth(new java.sql.Date(parsedDate.getTime()));
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+
+        if (patientDAO.createPatient(patient)) {
+            StringBuilder json = new StringBuilder();
+            json.append("{");
+            json.append("\"success\": true,");
+            json.append("\"message\": \"Tạo hồ sơ thành công\",");
+            json.append("\"patient\": {");
+            json.append("\"patientId\": ").append(patient.getPatientId()).append(",");
+            json.append("\"patientCode\": \"").append(escapeJson(patient.getPatientCode())).append("\",");
+            json.append("\"fullName\": \"").append(escapeJson(patient.getFullName())).append("\",");
+            json.append("\"phoneNumber\": \"").append(escapeJson(patient.getPhoneNumber())).append("\"");
+            json.append("}");
+            json.append("}");
+            out.print(json.toString());
+        } else {
+            out.print("{\"success\": false, \"message\": \"Có lỗi xảy ra khi lưu hồ sơ\"}");
+        }
+        
+        out.flush();
+    }
+
     private String escapeJson(String data) {
         if (data == null) {
             return "";

@@ -27,6 +27,7 @@ public class Appointment {
     private Integer visitId;
     private Integer invoiceId;
     private String invoiceStatus;
+    private Integer estimatedWaitTime;
 
     public Appointment() {
     }
@@ -205,5 +206,13 @@ public class Appointment {
 
     public void setInvoiceStatus(String invoiceStatus) {
         this.invoiceStatus = invoiceStatus;
+    }
+
+    public Integer getEstimatedWaitTime() {
+        return estimatedWaitTime;
+    }
+
+    public void setEstimatedWaitTime(Integer estimatedWaitTime) {
+        this.estimatedWaitTime = estimatedWaitTime;
     }
 }

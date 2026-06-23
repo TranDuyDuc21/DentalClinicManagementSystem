@@ -126,7 +126,7 @@ public class AppointmentDAO extends DBContext {
         return 0;
     }
 
-    public List<Appointment> getAllAppointmentsByRole(Integer doctorId, Integer patientId, String status, String searchStr, int offset, int limit) {
+    public List<Appointment> getAllAppointmentsByRole(Integer doctorId, Integer patientId, String status, String searchStr, Integer filterDoctorId, String filterDate, int offset, int limit) {
         List<Appointment> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                      "SELECT a.*, " +
@@ -134,7 +134,9 @@ public class AppointmentDAO extends DBContext {
                      "u.full_name as doctorName, " +
                      "s.service_name as serviceName, " +
                      "v.visit_id as visitId, " +
-                     "inv.invoice_id as invoiceId, inv.status as invoiceStatus " +
+                     "inv.invoice_id as invoiceId, inv.status as invoiceStatus, " +
+                     "(SELECT COUNT(*) + 1 FROM appointments a2 WHERE a2.doctor_id = a.doctor_id AND DATE(a2.scheduled_datetime) = DATE(a.scheduled_datetime) AND a2.scheduled_datetime < a.scheduled_datetime AND a2.status NOT IN ('Cancelled')) AS liveQueue, " +
+                     "(SELECT COALESCE(SUM(s2.estimated_minutes), 0) FROM appointments a3 JOIN services s2 ON a3.service_id = s2.service_id WHERE a3.doctor_id = a.doctor_id AND DATE(a3.scheduled_datetime) = DATE(a.scheduled_datetime) AND a3.status IN ('Waiting', 'In Exam') AND a3.scheduled_datetime < a.scheduled_datetime) AS waitTime " +
                      "FROM appointments a " +
                      "JOIN patients p ON a.patient_id = p.patient_id " +
                      "JOIN doctors d ON a.doctor_id = d.doctor_id " +
@@ -147,6 +149,8 @@ public class AppointmentDAO extends DBContext {
         if (doctorId != null) sql.append(" AND a.doctor_id = ? ");
         if (patientId != null) sql.append(" AND a.patient_id = ? ");
         if (status != null && !status.isEmpty()) sql.append(" AND a.status = ? ");
+        if (filterDoctorId != null) sql.append(" AND a.doctor_id = ? ");
+        if (filterDate != null && !filterDate.isEmpty()) sql.append(" AND DATE(a.scheduled_datetime) = ? ");
         if (searchStr != null && !searchStr.isEmpty()) {
             sql.append(" AND (p.full_name LIKE ? OR p.phone_number LIKE ? OR u.full_name LIKE ?) ");
         }
@@ -160,6 +164,8 @@ public class AppointmentDAO extends DBContext {
             if (doctorId != null) ps.setInt(paramIndex++, doctorId);
             if (patientId != null) ps.setInt(paramIndex++, patientId);
             if (status != null && !status.isEmpty()) ps.setString(paramIndex++, status);
+            if (filterDoctorId != null) ps.setInt(paramIndex++, filterDoctorId);
+            if (filterDate != null && !filterDate.isEmpty()) ps.setString(paramIndex++, filterDate);
             
             if (searchStr != null && !searchStr.isEmpty()) {
                 String likeSearch = "%" + searchStr + "%";
@@ -181,7 +187,8 @@ public class AppointmentDAO extends DBContext {
                     a.setScheduledDatetime(rs.getTimestamp("scheduled_datetime"));
                     a.setStatus(rs.getString("status"));
                     a.setBookingSource(rs.getString("booking_source"));
-                    a.setQueueNumber(rs.getObject("queue_number") != null ? rs.getInt("queue_number") : null);
+                    a.setQueueNumber(rs.getObject("liveQueue") != null ? rs.getInt("liveQueue") : null);
+                    a.setEstimatedWaitTime(rs.getObject("waitTime") != null ? rs.getInt("waitTime") : 0);
                     a.setCheckInTime(rs.getTimestamp("check_in_time"));
                     a.setExamStartTime(rs.getTimestamp("exam_start_time"));
                     a.setExamEndTime(rs.getTimestamp("exam_end_time"));
@@ -206,7 +213,7 @@ public class AppointmentDAO extends DBContext {
         return list;
     }
 
-    public int getTotalAppointmentsByRole(Integer doctorId, Integer patientId, String status, String searchStr) {
+    public int getTotalAppointmentsByRole(Integer doctorId, Integer patientId, String status, String searchStr, Integer filterDoctorId, String filterDate) {
         StringBuilder sql = new StringBuilder(
                      "SELECT COUNT(*) FROM appointments a " +
                      "JOIN patients p ON a.patient_id = p.patient_id " +
@@ -217,6 +224,8 @@ public class AppointmentDAO extends DBContext {
         if (doctorId != null) sql.append(" AND a.doctor_id = ? ");
         if (patientId != null) sql.append(" AND a.patient_id = ? ");
         if (status != null && !status.isEmpty()) sql.append(" AND a.status = ? ");
+        if (filterDoctorId != null) sql.append(" AND a.doctor_id = ? ");
+        if (filterDate != null && !filterDate.isEmpty()) sql.append(" AND DATE(a.scheduled_datetime) = ? ");
         if (searchStr != null && !searchStr.isEmpty()) {
             sql.append(" AND (p.full_name LIKE ? OR p.phone_number LIKE ? OR u.full_name LIKE ?) ");
         }
@@ -228,6 +237,9 @@ public class AppointmentDAO extends DBContext {
             if (doctorId != null) ps.setInt(paramIndex++, doctorId);
             if (patientId != null) ps.setInt(paramIndex++, patientId);
             if (status != null && !status.isEmpty()) ps.setString(paramIndex++, status);
+            if (filterDoctorId != null) ps.setInt(paramIndex++, filterDoctorId);
+            if (filterDate != null && !filterDate.isEmpty()) ps.setString(paramIndex++, filterDate);
+            
             if (searchStr != null && !searchStr.isEmpty()) {
                 String likeSearch = "%" + searchStr + "%";
                 ps.setString(paramIndex++, likeSearch);
@@ -317,6 +329,18 @@ public class AppointmentDAO extends DBContext {
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
+            ps.setInt(2, appointmentId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public boolean rescheduleAppointment(int appointmentId, Timestamp newScheduledDatetime) {
+        String sql = "UPDATE appointments SET scheduled_datetime = ?, status = 'New' WHERE appointment_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, newScheduledDatetime);
             ps.setInt(2, appointmentId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {

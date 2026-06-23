@@ -31,19 +31,40 @@ public class AppointmentActionServlet extends HttpServlet {
             int appointmentId = Integer.parseInt(request.getParameter("appointmentId"));
             String action = request.getParameter("action"); // cancel, check-in, done, in-exam
 
-            String newStatus = null;
-            if ("cancel".equals(action)) newStatus = "Cancelled";
-            else if ("check-in".equals(action)) newStatus = "Waiting";
-            else if ("in-exam".equals(action)) newStatus = "In Exam";
-            else if ("done".equals(action)) newStatus = "Done";
-
-            if (newStatus != null) {
-                // To do later: Check permissions (e.g. customer can only cancel their own)
-                boolean updated = appointmentDAO.updateAppointmentStatus(appointmentId, newStatus);
-                if (updated) {
-                    session.setAttribute("successMessage", "Đã cập nhật trạng thái lịch hẹn thành công.");
+            if ("reschedule".equals(action)) {
+                String newDate = request.getParameter("newDate"); // YYYY-MM-DD
+                String newTime = request.getParameter("newTime"); // HH:mm:ss or HH:mm
+                
+                if (newDate != null && newTime != null) {
+                    String dtStr = newDate + "T" + newTime;
+                    if (newTime.length() == 5) dtStr += ":00"; // Ensure seconds are present for parsing
+                    java.sql.Timestamp newTimestamp = java.sql.Timestamp.valueOf(java.time.LocalDateTime.parse(dtStr, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                    
+                    boolean updated = appointmentDAO.rescheduleAppointment(appointmentId, newTimestamp);
+                    if (updated) {
+                        session.setAttribute("successMessage", "Đã đổi lịch hẹn thành công sang ngày " + newDate + " lúc " + newTime + ".");
+                        response.sendRedirect(request.getContextPath() + "/appointments");
+                        return;
+                    } else {
+                        session.setAttribute("errorMessage", "Không thể đổi lịch. Giờ này có thể đã được đặt hoặc bác sĩ không có ca làm việc.");
+                    }
                 } else {
-                    session.setAttribute("errorMessage", "Không thể cập nhật trạng thái. Vui lòng thử lại.");
+                    session.setAttribute("errorMessage", "Vui lòng chọn ngày và giờ hợp lệ.");
+                }
+            } else {
+                String newStatus = null;
+                if ("cancel".equals(action)) newStatus = "Cancelled";
+                else if ("check-in".equals(action)) newStatus = "Waiting";
+                else if ("in-exam".equals(action)) newStatus = "In Exam";
+                else if ("done".equals(action)) newStatus = "Done";
+
+                if (newStatus != null) {
+                    boolean updated = appointmentDAO.updateAppointmentStatus(appointmentId, newStatus);
+                    if (updated) {
+                        session.setAttribute("successMessage", "Đã cập nhật trạng thái lịch hẹn thành công.");
+                    } else {
+                        session.setAttribute("errorMessage", "Không thể cập nhật trạng thái. Vui lòng thử lại.");
+                    }
                 }
             }
         } catch (Exception e) {

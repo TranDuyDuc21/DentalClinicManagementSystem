@@ -12,7 +12,7 @@ public class PatientDAO {
     public String generatePatientCode() {
         String year = String.valueOf(java.time.Year.now().getValue());
         String codePrefix = "PT-" + year + "-";
-        String sql = "SELECT patient_code FROM patients WHERE patient_code LIKE ? ORDER BY patient_code DESC LIMIT 1";
+        String sql = "SELECT patient_code FROM patients WHERE patient_code LIKE ? ORDER BY CAST(SUBSTRING_INDEX(patient_code, '-', -1) AS UNSIGNED) DESC LIMIT 1";
         
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -264,5 +264,44 @@ public class PatientDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Patient getPatientById(int id) {
+        String sql = "SELECT * FROM patients WHERE patient_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Patient p = new Patient();
+                    p.setPatientId(rs.getInt("patient_id"));
+                    p.setPatientCode(rs.getString("patient_code"));
+                    p.setUserId(rs.getObject("user_id") != null ? rs.getInt("user_id") : null);
+                    p.setFullName(rs.getString("full_name"));
+                    p.setDateOfBirth(rs.getDate("date_of_birth"));
+                    p.setGender(rs.getString("gender"));
+                    p.setPhoneNumber(rs.getString("phone_number"));
+                    p.setEmail(rs.getString("email"));
+                    p.setAddress(rs.getString("address"));
+                    p.setMedicalHistory(rs.getString("medical_history"));
+                    p.setDrugAllergies(rs.getString("drug_allergies"));
+                    p.setCreatedAt(rs.getTimestamp("created_at"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting patient by id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean deletePatient(int patientId) throws SQLException {
+        String sql = "DELETE FROM patients WHERE patient_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, patientId);
+            return ps.executeUpdate() > 0;
+        }
     }
 }

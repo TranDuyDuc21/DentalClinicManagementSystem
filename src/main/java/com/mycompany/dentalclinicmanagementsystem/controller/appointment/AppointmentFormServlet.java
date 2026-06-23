@@ -3,6 +3,7 @@ package com.mycompany.dentalclinicmanagementsystem.controller.appointment;
 import com.mycompany.dentalclinicmanagementsystem.dao.DoctorDAO;
 import com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO;
 import com.mycompany.dentalclinicmanagementsystem.dao.ServiceDAO;
+import com.mycompany.dentalclinicmanagementsystem.model.Appointment;
 import com.mycompany.dentalclinicmanagementsystem.model.Doctor;
 import com.mycompany.dentalclinicmanagementsystem.model.Patient;
 import com.mycompany.dentalclinicmanagementsystem.model.Service;
@@ -85,6 +86,12 @@ public class AppointmentFormServlet extends HttpServlet {
 
             if (result.success) {
                 session.setAttribute("successMessage", result.message);
+                
+                // Simulate sending email
+                Appointment appt = new Appointment();
+                appt.setScheduledDatetime(scheduledDatetime);
+                com.mycompany.dentalclinicmanagementsystem.util.EmailService.sendAppointmentConfirmation("patient_mock@example.com", "Quý Khách", appt);
+
                 response.sendRedirect(request.getContextPath() + "/appointments");
             } else {
                 session.setAttribute("errorMessage", result.message);

@@ -8,6 +8,8 @@
     <jsp:param name="pageTitle" value="Quản Lý Lịch Khám" />
 </jsp:include>
 
+<jsp:include page="/WEB-INF/views/components/messages.jsp" />
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-calendar-check"></i> Danh Sách Lịch Khám</h2>
     <a href="${pageContext.request.contextPath}/appointment-form" class="btn btn-primary" style="width: auto;">
@@ -16,7 +18,16 @@
 </div>
 
 <t:searchFilter actionUrl="${pageContext.request.contextPath}/appointments" searchPlaceholder="Tìm theo Tên bệnh nhân, SĐT, Bác sĩ..." searchValue="${param.search}">
-    <select name="status" class="form-control" onchange="this.form.submit()" style="width: 200px;">
+    <select name="doctorId" class="form-control" onchange="this.form.submit()" style="width: 200px; margin-right: 10px;">
+        <option value="">-- Tất Cả Bác Sĩ --</option>
+        <c:forEach var="doc" items="${doctors}">
+            <option value="${doc.doctorId}" ${param.doctorId == doc.doctorId ? 'selected' : ''}>${doc.fullName}</option>
+        </c:forEach>
+    </select>
+    
+    <input type="date" name="filterDate" class="form-control" value="${param.filterDate}" onchange="this.form.submit()" style="width: 150px; margin-right: 10px;">
+
+    <select name="status" class="form-control" onchange="this.form.submit()" style="width: 180px;">
         <option value="All" ${currentStatus == 'All' ? 'selected' : ''}>Tất Cả Trạng Thái</option>
         <option value="New" ${currentStatus == 'New' ? 'selected' : ''}>Mới (New)</option>
         <option value="Waiting" ${currentStatus == 'Waiting' ? 'selected' : ''}>Chờ Khám (Waiting)</option>
@@ -31,12 +42,13 @@
         <table style="width: 100%; border-collapse: collapse; min-width: 1000px;">
             <thead>
                 <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
-                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Mã Lịch</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Bệnh Nhân</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">SĐT</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Bác Sĩ</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Dịch Vụ</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Giờ Hẹn</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); text-align: center;">Số TT</th>
+                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); text-align: center;">TG Chờ</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Trạng Thái</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary); text-align: left;">Hành Động</th>
                 </tr>
@@ -44,13 +56,26 @@
             <tbody>
                 <c:forEach var="appt" items="${appointments}">
                     <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
-                        <td style="padding: 12px; font-weight: 500; color: var(--text-primary);">#${appt.appointmentId}</td>
                         <td style="padding: 12px; color: var(--text-primary); font-weight: 500;">${appt.patientName}</td>
                         <td style="padding: 12px; color: var(--text-secondary); font-size: 0.95rem;">${appt.patientPhone}</td>
                         <td style="padding: 12px; color: var(--text-secondary);">${appt.doctorName}</td>
                         <td style="padding: 12px; color: var(--text-secondary); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${appt.serviceName}">${empty appt.serviceName ? 'Khám / Tư Vấn' : appt.serviceName}</td>
                         <td style="padding: 12px; color: var(--text-primary); font-weight: 500;">
                             <fmt:formatDate value="${appt.scheduledDatetime}" pattern="HH:mm - dd/MM/yyyy"/>
+                        </td>
+                        <td style="padding: 12px; text-align: center; font-weight: 700; color: var(--primary);">
+                            <c:if test="${appt.queueNumber != null}">#${appt.queueNumber}</c:if>
+                        </td>
+                        <td style="padding: 12px; text-align: center; font-size: 0.9rem;">
+                            <c:choose>
+                                <c:when test="${appt.estimatedWaitTime > 0}">
+                                    <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> ~${appt.estimatedWaitTime}p</span>
+                                </c:when>
+                                <c:when test="${appt.status == 'New' || appt.status == 'Waiting'}">
+                                    <span style="color: #16a34a;">Sẵn sàng</span>
+                                </c:when>
+                                <c:otherwise>-</c:otherwise>
+                            </c:choose>
                         </td>
                         <td style="padding: 12px;">
                             <c:choose>

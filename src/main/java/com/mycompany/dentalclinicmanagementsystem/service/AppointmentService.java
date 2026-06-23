@@ -139,34 +139,36 @@ public class AppointmentService {
         return new BookingResult(false, "Lỗi khi tạo lịch hẹn.");
     }
 
-    public List<Appointment> getAppointmentsForUser(User user, String status, String searchStr, int offset, int limit) {
-        String role = user.getRoleName();
-        if ("Customer".equalsIgnoreCase(role)) {
-            Patient p = patientDAO.getPatientByUserId(user.getUserId());
-            if (p == null) return java.util.Collections.emptyList();
-            return appointmentDAO.getAllAppointmentsByRole(null, p.getPatientId(), status, searchStr, offset, limit);
-        } else if ("Doctor".equalsIgnoreCase(role)) {
-            Integer doctorId = doctorDAO.getDoctorIdByUserId(user.getUserId());
-            if (doctorId == null) return java.util.Collections.emptyList();
-            return appointmentDAO.getAllAppointmentsByRole(doctorId, null, status, searchStr, offset, limit);
+    public List<Appointment> getAppointmentsForUser(User user, String status, String searchStr, Integer filterDoctorId, String filterDate, int offset, int limit) {
+        if ("Customer".equalsIgnoreCase(user.getRoleName())) {
+            // Customers see only their own appointments
+            PatientDAO ptDao = new PatientDAO();
+            Patient pt = ptDao.getPatientByUserId(user.getUserId());
+            int ptId = (pt != null) ? pt.getPatientId() : -1;
+            return appointmentDAO.getAllAppointmentsByRole(null, ptId, status, searchStr, filterDoctorId, filterDate, offset, limit);
+        } else if ("Doctor".equalsIgnoreCase(user.getRoleName())) {
+            // Doctors see only their own appointments
+            DoctorDAO docDao = new DoctorDAO();
+            int docId = docDao.getDoctorIdByUserId(user.getUserId());
+            return appointmentDAO.getAllAppointmentsByRole(docId, null, status, searchStr, filterDoctorId, filterDate, offset, limit);
         } else {
             // Receptionist, Admin, Technician
-            return appointmentDAO.getAllAppointmentsByRole(null, null, status, searchStr, offset, limit);
+            return appointmentDAO.getAllAppointmentsByRole(null, null, status, searchStr, filterDoctorId, filterDate, offset, limit);
         }
     }
 
-    public int getTotalAppointmentsForUser(User user, String status, String searchStr) {
-        String role = user.getRoleName();
-        if ("Customer".equalsIgnoreCase(role)) {
-            Patient p = patientDAO.getPatientByUserId(user.getUserId());
-            if (p == null) return 0;
-            return appointmentDAO.getTotalAppointmentsByRole(null, p.getPatientId(), status, searchStr);
-        } else if ("Doctor".equalsIgnoreCase(role)) {
-            Integer doctorId = doctorDAO.getDoctorIdByUserId(user.getUserId());
-            if (doctorId == null) return 0;
-            return appointmentDAO.getTotalAppointmentsByRole(doctorId, null, status, searchStr);
+    public int getTotalAppointmentsForUser(User user, String status, String searchStr, Integer filterDoctorId, String filterDate) {
+        if ("Customer".equalsIgnoreCase(user.getRoleName())) {
+            PatientDAO ptDao = new PatientDAO();
+            Patient pt = ptDao.getPatientByUserId(user.getUserId());
+            int ptId = (pt != null) ? pt.getPatientId() : -1;
+            return appointmentDAO.getTotalAppointmentsByRole(null, ptId, status, searchStr, filterDoctorId, filterDate);
+        } else if ("Doctor".equalsIgnoreCase(user.getRoleName())) {
+            DoctorDAO docDao = new DoctorDAO();
+            int docId = docDao.getDoctorIdByUserId(user.getUserId());
+            return appointmentDAO.getTotalAppointmentsByRole(docId, null, status, searchStr, filterDoctorId, filterDate);
         } else {
-            return appointmentDAO.getTotalAppointmentsByRole(null, null, status, searchStr);
+            return appointmentDAO.getTotalAppointmentsByRole(null, null, status, searchStr, filterDoctorId, filterDate);
         }
     }
 }
