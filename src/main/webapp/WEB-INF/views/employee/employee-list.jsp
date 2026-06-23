@@ -51,7 +51,6 @@
         <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
             <thead>
                 <tr style="border-bottom: 2px solid var(--border-color); text-align: left; background: #f8fafc;">
-                    <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">ID</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Họ Tên</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">Tài Khoản</th>
                     <th style="padding: 15px 12px; font-weight: 600; color: var(--text-secondary);">SĐT</th>
@@ -63,7 +62,6 @@
             <tbody>
                 <c:forEach var="emp" items="${employees}">
                     <tr style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
-                        <td style="padding: 12px; color: var(--text-secondary);">#${emp.userId}</td>
                         <td style="padding: 12px; font-weight: 500; color: var(--text-primary);">${emp.fullName}</td>
                         <td style="padding: 12px;">${emp.username}</td>
                         <td style="padding: 12px;">${emp.phoneNumber}</td>
@@ -117,7 +115,7 @@
                 </c:forEach>
                 <c:if test="${empty employees}">
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                        <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-secondary);">
                             Không có dữ liệu nhân viên nào.
                         </td>
                     </tr>
