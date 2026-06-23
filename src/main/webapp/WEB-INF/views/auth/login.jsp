@@ -31,7 +31,7 @@
                 <label for="password" class="form-label">Mật khẩu</label>
                 <div style="position: relative;">
                     <input type="password" id="password" name="password" class="form-control" 
-                           required pattern="^\S+$" title="Mật khẩu không được chứa khoảng trắng" placeholder="Nhập mật khẩu" style="padding-right: 40px;">
+                           required pattern=".*\S.*" title="Mật khẩu không được chỉ chứa khoảng trắng" placeholder="Nhập mật khẩu" style="padding-right: 40px;">
                     <i class="fa-solid fa-eye" id="togglePassword" style="position: absolute; right: 10px; top: 24px; transform: translateY(-50%); cursor: pointer; color: #6b7280;" onclick="
                         const passwordInput = document.getElementById('password');
                         if (passwordInput.type === 'password') {

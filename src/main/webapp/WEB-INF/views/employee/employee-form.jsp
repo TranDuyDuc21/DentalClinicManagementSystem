@@ -45,7 +45,7 @@
 
                 <div class="form-group">
                     <label class="form-label" for="password">Mật khẩu ${empty employee ? '<span style="color: red;">*</span>' : '<span style="font-size:0.85rem; color:var(--text-secondary)">(Để trống nếu không muốn đổi)</span>'}</label>
-                    <input type="password" class="form-control" id="password" name="password" minlength="6" placeholder="Mật khẩu ít nhất 6 ký tự" ${empty employee ? 'required' : ''}>
+                    <input type="password" class="form-control" id="password" name="password" minlength="6" pattern=".*\S.*" title="Mật khẩu không được chỉ chứa khoảng trắng" placeholder="Mật khẩu ít nhất 6 ký tự" ${empty employee ? 'required' : ''}>
                 </div>
             </div>
 
