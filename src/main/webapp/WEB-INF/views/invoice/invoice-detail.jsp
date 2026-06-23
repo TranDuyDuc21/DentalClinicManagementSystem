@@ -10,7 +10,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
     <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-file-invoice"></i> Chi Tiết Hóa Đơn #${invoice.invoiceCode}</h2>
     <div style="display: flex; gap: 10px;">
-        <c:if test="${invoice.status == 'Unpaid'}">
+        <c:if test="${invoice.status == 'Unpaid' && sessionScope.loggedUser.roleName != 'Customer'}">
             <a href="${pageContext.request.contextPath}/invoice-update?id=${invoice.invoiceId}" class="btn btn-primary" style="width: auto;">
                 <i class="fa-solid fa-pen-to-square"></i> Chỉnh Sửa
             </a>
@@ -21,15 +21,31 @@
                 </button>
             </form>
         </c:if>
-        <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
-            <i class="fa-solid fa-arrow-left"></i> Quay lại
-        </a>
+        <c:choose>
+            <c:when test="${sessionScope.loggedUser.roleName == 'Customer'}">
+                <a href="${pageContext.request.contextPath}/customer-invoices" class="btn btn-outline-secondary" style="width: auto;">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </a>
+            </c:when>
+            <c:otherwise>
+                <a href="${pageContext.request.contextPath}/invoices" class="btn btn-outline-secondary" style="width: auto;">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                </a>
+            </c:otherwise>
+        </c:choose>
     </div>
 </div>
 
+<c:if test="${not empty error}">
+    <div class="alert alert-error" style="margin-bottom: 20px; background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 12px; border-radius: 8px;">
+        <i class="fa-solid fa-circle-xmark"></i> ${error}
+        <c:remove var="error" scope="session"/>
+    </div>
+</c:if>
+
 <c:if test="${not empty msg}">
-    <div class="alert alert-success" style="margin-bottom: 20px;">
-        ${msg}
+    <div class="alert alert-success" style="margin-bottom: 20px; background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px;">
+        <i class="fa-solid fa-circle-check"></i> ${msg}
         <c:remove var="msg" scope="session"/>
     </div>
 </c:if>
@@ -152,35 +168,59 @@
                 <div class="alert alert-error"><i class="fa-solid fa-circle-xmark"></i> Hóa đơn này đã bị hủy.</div>
             </c:if>
             <c:if test="${invoice.status == 'Unpaid'}">
-                <form action="${pageContext.request.contextPath}/invoice-payment" method="POST" style="margin: 0;">
-                    <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
-                    
-                    <c:set var="paidAmount" value="0"/>
-                    <c:forEach var="p" items="${payments}">
-                        <c:set var="paidAmount" value="${paidAmount + p.amount}"/>
-                    </c:forEach>
-                    <c:set var="remaining" value="${invoice.totalAmount - paidAmount}"/>
+                <c:choose>
+                    <c:when test="${sessionScope.loggedUser.roleName == 'Customer' || sessionScope.loggedUser.roleId == 5}">
+                        <form action="${pageContext.request.contextPath}/vnpay-payment" method="GET" style="margin: 0;">
+                            <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
+                            
+                            <c:set var="paidAmount" value="0"/>
+                            <c:forEach var="p" items="${payments}">
+                                <c:set var="paidAmount" value="${paidAmount + p.amount}"/>
+                            </c:forEach>
+                            <c:set var="remaining" value="${invoice.totalAmount - paidAmount}"/>
+                            <input type="hidden" name="amount" value="${remaining}">
 
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Số Tiền (VND)</label>
-                        <input type="number" class="form-control" name="amount" value="${remaining}" step="1000" readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Phương Thức</label>
-                        <select class="form-control" name="paymentMethod" required style="width: 100%; box-sizing: border-box;">
-                            <option value="Cash">Tiền mặt</option>
-                            <option value="Bank Transfer">Chuyển khoản</option>
-                            <option value="Card">Thẻ</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Mã GD (Tuỳ chọn)</label>
-                        <input type="text" class="form-control" name="transactionRef" placeholder="VD: TXN123456" style="width: 100%; box-sizing: border-box;">
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">
-                        <i class="fa-solid fa-money-bill-wave"></i> Thanh Toán
-                    </button>
-                </form>
+                            <div style="margin-bottom: 20px;">
+                                <p style="color: var(--text-secondary); margin-bottom: 10px;">Bạn còn nợ: <strong style="color: var(--error); font-size: 1.2rem;"><fmt:formatNumber value="${remaining}" type="currency" currencySymbol="VND" maxFractionDigits="0"/></strong></p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">Thanh toán an toàn và tiện lợi qua cổng thanh toán VNPay.</p>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; background-color: #005baa; border-color: #005baa;">
+                                <i class="fa-solid fa-credit-card"></i> Thanh Toán bằng VNPay
+                            </button>
+                        </form>
+                    </c:when>
+                    <c:otherwise>
+                        <form action="${pageContext.request.contextPath}/invoice-payment" method="POST" style="margin: 0;">
+                            <input type="hidden" name="invoiceId" value="${invoice.invoiceId}">
+                            
+                            <c:set var="paidAmount" value="0"/>
+                            <c:forEach var="p" items="${payments}">
+                                <c:set var="paidAmount" value="${paidAmount + p.amount}"/>
+                            </c:forEach>
+                            <c:set var="remaining" value="${invoice.totalAmount - paidAmount}"/>
+
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Số Tiền (VND)</label>
+                                <input type="number" class="form-control" name="amount" value="${remaining}" step="1000" readonly style="width: 100%; box-sizing: border-box; background-color: #f1f5f9; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Phương Thức</label>
+                                <select class="form-control" name="paymentMethod" required style="width: 100%; box-sizing: border-box;">
+                                    <option value="Cash">Tiền mặt</option>
+                                    <option value="Bank Transfer">Chuyển khoản</option>
+                                    <option value="Card">Thẻ</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-secondary);">Mã GD (Tuỳ chọn)</label>
+                                <input type="text" class="form-control" name="transactionRef" placeholder="VD: TXN123456" style="width: 100%; box-sizing: border-box;">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <i class="fa-solid fa-money-bill-wave"></i> Thanh Toán
+                            </button>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
             </c:if>
         </div>
     </div>

@@ -256,20 +256,27 @@
                     </div>
                 </div>
 
-                <!-- Hành động (Chỉ hiện nếu lịch chưa diễn ra) -->
-                <c:if test="${appt.status == 'New' || appt.status == 'Waiting'}">
+                <!-- Hành động (Chỉ hiện nếu lịch chưa diễn ra hoặc có hóa đơn) -->
+                <c:if test="${appt.status == 'New' || appt.status == 'Waiting' || (not empty appt.invoiceId && appt.invoiceId > 0)}">
                     <div class="appt-actions">
-                        <a href="${pageContext.request.contextPath}/reschedule-appointment?appointmentId=${appt.appointmentId}&serviceId=${appt.serviceId}&doctorId=${appt.doctorId}" class="btn-appt btn-reschedule" style="display: inline-block; text-decoration: none;">
-                            <i class="fa-solid fa-calendar-days"></i> Đổi Lịch
-                        </a>
-                        
-                        <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="flex: 1; margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn hủy lịch khám này?', () => form.submit(), 'danger');">
-                            <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
-                            <input type="hidden" name="action" value="cancel">
-                            <button type="submit" class="btn-appt btn-cancel" style="width: 100%;">
-                                <i class="fa-solid fa-xmark"></i> Hủy Khám
-                            </button>
-                        </form>
+                        <c:if test="${appt.status == 'New' || appt.status == 'Waiting'}">
+                            <a href="${pageContext.request.contextPath}/reschedule-appointment?appointmentId=${appt.appointmentId}&serviceId=${appt.serviceId}&doctorId=${appt.doctorId}" class="btn-appt btn-reschedule" style="display: inline-block; text-decoration: none;">
+                                <i class="fa-solid fa-calendar-days"></i> Đổi Lịch
+                            </a>
+                            
+                            <form action="${pageContext.request.contextPath}/appointment-action" method="POST" style="flex: 1; margin: 0;" onsubmit="event.preventDefault(); const form = this; showConfirmModal('Bạn có chắc chắn muốn hủy lịch khám này?', () => form.submit(), 'danger');">
+                                <input type="hidden" name="appointmentId" value="${appt.appointmentId}">
+                                <input type="hidden" name="action" value="cancel">
+                                <button type="submit" class="btn-appt btn-cancel" style="width: 100%;">
+                                    <i class="fa-solid fa-xmark"></i> Hủy Khám
+                                </button>
+                            </form>
+                        </c:if>
+                        <c:if test="${not empty appt.invoiceId && appt.invoiceId > 0}">
+                            <a href="${pageContext.request.contextPath}/invoice-detail?id=${appt.invoiceId}" class="btn-appt" style="flex: 1; background: #f8fafc; color: var(--primary); border: 1px solid var(--primary); display: inline-block; text-decoration: none;">
+                                <i class="fa-solid fa-file-invoice-dollar"></i> Xem Hóa Đơn
+                            </a>
+                        </c:if>
                     </div>
                 </c:if>
             </div>

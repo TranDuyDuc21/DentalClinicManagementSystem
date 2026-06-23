@@ -576,3 +576,29 @@ INSERT INTO appointments (patient_id, doctor_id, service_id, scheduled_datetime,
 
 (1, 1, 1, '2026-06-26 13:30:00', 'Waiting', 'Online', 2),
 (2, 1, 2, '2026-06-26 14:30:00', 'Waiting', 'Online', 2);
+
+-- ==========================================
+-- SEED DATA FOR VNPAY TESTING
+-- ==========================================
+INSERT INTO users (role_id, username, email, password_hash, full_name, phone_number, is_active) 
+VALUES (5, 'vnpay_tester', 'vnpay@dental.com', '123456', 'VNPay Tester', '0999999999', TRUE);
+SET @vnpayUserId = LAST_INSERT_ID();
+
+INSERT INTO patients (patient_code, user_id, full_name, date_of_birth, gender, phone_number, email, address) 
+VALUES ('PT-2026-9999', @vnpayUserId, 'VNPay Tester', '1990-01-01', 'Male', '0999999999', 'vnpay@dental.com', 'HCMC');
+SET @vnpayPatientId = LAST_INSERT_ID();
+
+INSERT INTO appointments (patient_id, doctor_id, scheduled_datetime, status)
+VALUES (@vnpayPatientId, 3, '2026-06-25 08:00:00', 'Done');
+SET @vnpayApptId = LAST_INSERT_ID();
+
+INSERT INTO visits (appointment_id, patient_id, doctor_id, visit_date, diagnosis, clinical_notes)
+VALUES (@vnpayApptId, @vnpayPatientId, 3, '2026-06-25 08:30:00', 'Sâu răng', 'Cần thanh toán để hoàn tất');
+SET @vnpayVisitId = LAST_INSERT_ID();
+
+INSERT INTO invoices (invoice_code, visit_id, patient_id, subtotal, discount, total_amount, status, created_by)
+VALUES ('INV-2026-0001', @vnpayVisitId, @vnpayPatientId, 5000000, 0, 5000000, 'Unpaid', 2);
+SET @vnpayInvoiceId = LAST_INSERT_ID();
+
+INSERT INTO invoice_items (invoice_id, service_id, description, quantity, unit_price, line_total)
+VALUES (@vnpayInvoiceId, 1, 'Trám răng thẩm mỹ', 2, 2500000, 5000000);

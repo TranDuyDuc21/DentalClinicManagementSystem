@@ -359,14 +359,30 @@ public class InvoiceDAO extends DBContext {
                             try (ResultSet rsSum = psSum.executeQuery()) {
                                 if (rsSum.next()) {
                                     java.math.BigDecimal totalPaid = rsSum.getBigDecimal(1);
-                                    Invoice inv = getInvoiceById(payment.getInvoiceId());
-                                    if (inv != null && totalPaid != null && totalPaid.compareTo(inv.getTotalAmount()) >= 0) {
-                                        updateInvoiceStatus(payment.getInvoiceId(), "Paid");
+                                    if (totalPaid != null) {
+                                        // Query invoice total_amount using the SAME connection to avoid deadlocks
+                                        String getAmtSql = "SELECT total_amount FROM invoices WHERE invoice_id = ?";
+                                        try (PreparedStatement psAmt = connection.prepareStatement(getAmtSql)) {
+                                            psAmt.setInt(1, payment.getInvoiceId());
+                                            try (ResultSet rsAmt = psAmt.executeQuery()) {
+                                                if (rsAmt.next()) {
+                                                    java.math.BigDecimal totalAmt = rsAmt.getBigDecimal("total_amount");
+                                                    if (totalAmt != null && totalPaid.compareTo(totalAmt) >= 0) {
+                                                        String updateSql = "UPDATE invoices SET status = 'Paid' WHERE invoice_id = ?";
+                                                        try (PreparedStatement psUpdate = connection.prepareStatement(updateSql)) {
+                                                            psUpdate.setInt(1, payment.getInvoiceId());
+                                                            psUpdate.executeUpdate();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    
                     connection.commit();
                     return rows > 0;
                 }
@@ -400,5 +416,66 @@ public class InvoiceDAO extends DBContext {
         i.setCreatedByName(rs.getString("createdByName"));
         i.setPaymentMethods(rs.getString("paymentMethods"));
         return i;
+    }
+
+    public List<Invoice> getInvoicesByUserId(int userId, int limit, int offset) {
+        List<Invoice> list = new ArrayList<>();
+        String sql = "SELECT i.*, p.full_name as patientName, p.phone_number as patientPhone, u.full_name as createdByName, " +
+                     "(SELECT GROUP_CONCAT(DISTINCT py.payment_method SEPARATOR ', ') FROM payments py WHERE py.invoice_id = i.invoice_id) as paymentMethods " +
+                     "FROM invoices i " +
+                     "JOIN patients p ON i.patient_id = p.patient_id " +
+                     "LEFT JOIN users u ON i.created_by = u.user_id " +
+                     "WHERE p.user_id = ? " +
+                     "ORDER BY i.created_at DESC " +
+                     "LIMIT ? OFFSET ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Invoice i = new Invoice();
+                    i.setInvoiceId(rs.getInt("invoice_id"));
+                    i.setInvoiceCode(rs.getString("invoice_code"));
+                    i.setVisitId(rs.getInt("visit_id"));
+                    i.setPatientId(rs.getInt("patient_id"));
+                    i.setSubtotal(rs.getBigDecimal("subtotal"));
+                    i.setDiscount(rs.getBigDecimal("discount"));
+                    i.setTotalAmount(rs.getBigDecimal("total_amount"));
+                    i.setStatus(rs.getString("status"));
+                    i.setCreatedBy(rs.getInt("created_by"));
+                    i.setCreatedAt(rs.getTimestamp("created_at"));
+                    
+                    i.setPatientName(rs.getString("patientName"));
+                    i.setPatientPhone(rs.getString("patientPhone"));
+                    i.setCreatedByName(rs.getString("createdByName"));
+                    i.setPaymentMethods(rs.getString("paymentMethods"));
+                    
+                    list.add(i);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getTotalInvoicesByUserId(int userId) {
+        String sql = "SELECT COUNT(*) FROM invoices i " +
+                     "JOIN patients p ON i.patient_id = p.patient_id " +
+                     "WHERE p.user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

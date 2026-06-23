@@ -161,6 +161,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="${pageContext.request.contextPath}/customer-invoices" class="nav-link ${currentPage == 'customer-invoices' ? 'active' : ''}">
+                                <i class="fa-solid fa-file-invoice nav-icon"></i>
+                                <span class="nav-text">Hóa đơn của tôi</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="${pageContext.request.contextPath}/records" class="nav-link ${currentPage == 'records' ? 'active' : ''}">
                                 <i class="fa-solid fa-notes-medical nav-icon"></i>
                                 <span class="nav-text">Hồ sơ bệnh án</span>

@@ -30,6 +30,15 @@ public class InvoiceDetailServlet extends HttpServlet {
             Invoice invoice = invoiceDAO.getInvoiceById(invoiceId);
             
             if (invoice != null) {
+                com.mycompany.dentalclinicmanagementsystem.model.User loggedUser = (com.mycompany.dentalclinicmanagementsystem.model.User) request.getSession().getAttribute("loggedUser");
+                if (loggedUser != null && ("Customer".equals(loggedUser.getRoleName()) || loggedUser.getRoleId() == 5)) {
+                    com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO patientDAO = new com.mycompany.dentalclinicmanagementsystem.dao.PatientDAO();
+                    com.mycompany.dentalclinicmanagementsystem.model.Patient patient = patientDAO.getPatientById(invoice.getPatientId());
+                    if (patient == null || patient.getUserId() == null || !patient.getUserId().equals(loggedUser.getUserId())) {
+                        response.sendRedirect(request.getContextPath() + "/customer-invoices");
+                        return;
+                    }
+                }
                 List<InvoiceItem> items = invoiceDAO.getInvoiceItems(invoiceId);
                 List<Payment> payments = invoiceDAO.getPaymentsByInvoice(invoiceId);
                 
