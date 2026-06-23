@@ -256,9 +256,9 @@
                     </div>
                 </div>
 
-                <!-- Hành động (Chỉ hiện nếu lịch chưa diễn ra hoặc có hóa đơn) -->
-                <c:if test="${appt.status == 'New' || appt.status == 'Waiting' || (not empty appt.invoiceId && appt.invoiceId > 0)}">
-                    <div class="appt-actions">
+                <!-- Hành động (Chỉ hiện nếu lịch chưa diễn ra hoặc có hóa đơn, bệnh án) -->
+                <c:if test="${appt.status == 'New' || appt.status == 'Waiting' || (not empty appt.invoiceId && appt.invoiceId > 0) || (not empty appt.visitId && appt.visitId > 0)}">
+                    <div class="appt-actions" style="${(appt.status != 'New' && appt.status != 'Waiting') ? 'display: flex; gap: 10px;' : ''}">
                         <c:if test="${appt.status == 'New' || appt.status == 'Waiting'}">
                             <a href="${pageContext.request.contextPath}/reschedule-appointment?appointmentId=${appt.appointmentId}&serviceId=${appt.serviceId}&doctorId=${appt.doctorId}" class="btn-appt btn-reschedule" style="display: inline-block; text-decoration: none;">
                                 <i class="fa-solid fa-calendar-days"></i> Đổi Lịch
@@ -271,6 +271,11 @@
                                     <i class="fa-solid fa-xmark"></i> Hủy Khám
                                 </button>
                             </form>
+                        </c:if>
+                        <c:if test="${not empty appt.visitId && appt.visitId > 0}">
+                            <a href="${pageContext.request.contextPath}/customer-visit-detail?id=${appt.visitId}" class="btn-appt" style="flex: 1; background: #f0fdf4; color: #16a34a; border: 1px solid #16a34a; display: inline-block; text-decoration: none;">
+                                <i class="fa-solid fa-notes-medical"></i> Xem Bệnh Án
+                            </a>
                         </c:if>
                         <c:if test="${not empty appt.invoiceId && appt.invoiceId > 0}">
                             <a href="${pageContext.request.contextPath}/invoice-detail?id=${appt.invoiceId}" class="btn-appt" style="flex: 1; background: #f8fafc; color: var(--primary); border: 1px solid var(--primary); display: inline-block; text-decoration: none;">
