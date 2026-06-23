@@ -29,16 +29,18 @@ public class ServiceListServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User loggedUser = (User) session.getAttribute("loggedUser");
 
-        if (loggedUser == null || !"Admin".equals(loggedUser.getRoleName())) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+        boolean isCustomerOrGuest = (loggedUser == null || "Customer".equals(loggedUser.getRoleName()));
 
         String search = request.getParameter("search");
         String status = request.getParameter("status");
         
+        // For customers, only show active services
+        if (isCustomerOrGuest) {
+            status = "true";
+        }
+        
         int page = 1;
-        int limit = 10;
+        int limit = isCustomerOrGuest ? 9 : 10; // 9 cards per page for nice 3x3 grid
         try {
             if (request.getParameter("page") != null) {
                 page = Integer.parseInt(request.getParameter("page"));
@@ -57,6 +59,11 @@ public class ServiceListServlet extends HttpServlet {
         request.setAttribute("pageNumber", page);
         request.setAttribute("totalPages", totalPages);
 
-        request.getRequestDispatcher("/WEB-INF/views/service/service-list.jsp").forward(request, response);
+        if (isCustomerOrGuest) {
+            request.getRequestDispatcher("/WEB-INF/views/service/service-list-customer.jsp").forward(request, response);
+        } else {
+            // For other roles, if they are not Admin, they shouldn't access the management list, but let's assume Receptionist can view
+            request.getRequestDispatcher("/WEB-INF/views/service/service-list.jsp").forward(request, response);
+        }
     }
 }
