@@ -12,10 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet("/patients")
-public class PatientListServlet extends HttpServlet {
+@WebServlet("/patients/update")
+public class PatientUpdateServlet extends HttpServlet {
 
     private PatientService patientService;
 
@@ -29,34 +28,27 @@ public class PatientListServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User loggedUser = (User) session.getAttribute("loggedUser");
 
-        // Allowed for Receptionist, Admin, Doctor (per UC18: Doctor and Receptionist can view)
         if (loggedUser == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        String search = request.getParameter("search");
-        String gender = request.getParameter("gender");
-
-        String pageStr = request.getParameter("page");
-        int page = 1;
-        if (pageStr != null && !pageStr.isEmpty()) {
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.isEmpty()) {
             try {
-                page = Integer.parseInt(pageStr);
-                if (page < 1) page = 1;
+                int patientId = Integer.parseInt(idStr);
+                Patient patient = patientService.getPatientById(patientId);
+                if (patient != null) {
+                    request.setAttribute("patient", patient);
+                    request.getRequestDispatcher("/WEB-INF/views/patient/patient-form.jsp").forward(request, response);
+                    return;
+                }
             } catch (NumberFormatException e) {
-                page = 1;
+                // Ignore and fall through to error
             }
         }
-        int limit = 10;
-
-        List<Patient> patients = patientService.getAllPatients(search, gender, page, limit);
-        int totalPages = patientService.getTotalPages(search, gender, limit);
-
-        request.setAttribute("patients", patients);
-        request.setAttribute("pageNumber", page);
-        request.setAttribute("totalPages", totalPages);
         
-        request.getRequestDispatcher("/WEB-INF/views/patient/patient-list.jsp").forward(request, response);
+        session.setAttribute("errorMessage", "Không tìm thấy thông tin bệnh nhân.");
+        response.sendRedirect(request.getContextPath() + "/patients");
     }
 }
