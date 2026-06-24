@@ -30,7 +30,7 @@
                         <i class="fa-solid fa-camera"></i>
                     </div>
                 </div>
-                <input type="file" id="avatarInput" name="avatar" style="display: none;" accept="image/*" onchange="previewImage(event)">
+                <input type="file" id="avatarInput" name="avatar" style="display: none;" accept=".png, .jpg, .jpeg" onchange="previewImage(event)">
                 <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Nhấn vào ảnh để thay đổi</p>
             </div>
 
@@ -46,7 +46,7 @@
 
             <div class="form-group" style="margin-bottom: 15px;">
                 <label for="phoneNumber" class="form-label">Số điện thoại <span style="color: var(--error);">*</span></label>
-                <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" value="${sessionScope.loggedUser.phoneNumber}" required data-rule="phone" data-unique="phone" placeholder="Nhập số điện thoại (10-11 số)">
+                <input type="text" id="phoneNumber" name="phoneNumber" class="form-control" value="${sessionScope.loggedUser.phoneNumber}" required data-rule="phone" data-unique="phone" data-exclude-id="${sessionScope.loggedUser.userId}" placeholder="Nhập số điện thoại (10-11 số)">
             </div>
 
             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
