@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Auto dismiss alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
+
+    // Block spaces in all password inputs globally
+    document.addEventListener('input', function(event) {
+        if (event.target.tagName.toLowerCase() === 'input' && event.target.type === 'password') {
+            if (event.target.value.includes(' ')) {
+                event.target.value = event.target.value.replace(/\s/g, '');
+            }
+        }
+    });
     if (alerts.length > 0) {
         setTimeout(() => {
             alerts.forEach(alert => {

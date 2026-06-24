@@ -30,6 +30,6 @@
 
     <jsp:include page="/WEB-INF/views/components/confirm-modal.jsp" />
     <jsp:include page="/WEB-INF/views/components/alert-modal.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/validation.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/validation.js?v=1.1"></script>
 </body>
 </html>
