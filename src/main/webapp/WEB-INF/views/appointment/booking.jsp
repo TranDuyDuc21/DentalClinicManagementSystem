@@ -179,25 +179,30 @@
 
             fetch(`${pageContext.request.contextPath}/api/doctor/slots?doctorId=\${doctorId}&serviceId=\${serviceId}&date=\${date}`)
                 .then(response => response.json())
-                .then(slots => {
+                .then(data => {
                     loadingSlots.style.display = 'none';
-                    if (slots.length === 0) {
-                        slotsContainer.innerHTML = '<div style="grid-column: 1 / -1; color: #ef4444; font-weight: 600;">Không có khung giờ trống. Vui lòng chọn ngày khác.</div>';
+                    if (data.status === 'success') {
+                        const slots = data.slots;
+                        if (slots.length === 0) {
+                            slotsContainer.innerHTML = '<div style="grid-column: 1 / -1; color: #ef4444; font-weight: 600;">Không có khung giờ trống. Vui lòng chọn ngày khác.</div>';
+                        } else {
+                            slots.forEach(time => {
+                                const btn = document.createElement('button');
+                                btn.type = 'button';
+                                btn.className = 'slot-btn-sci';
+                                btn.textContent = time;
+                                btn.onclick = function() {
+                                    document.querySelectorAll('.slot-btn-sci').forEach(b => b.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    timeInput.value = time;
+                                    btnSubmitFake.disabled = false;
+                                    updateSummary();
+                                };
+                                slotsContainer.appendChild(btn);
+                            });
+                        }
                     } else {
-                        slots.forEach(time => {
-                            const btn = document.createElement('button');
-                            btn.type = 'button';
-                            btn.className = 'slot-btn-sci';
-                            btn.textContent = time;
-                            btn.onclick = function() {
-                                document.querySelectorAll('.slot-btn-sci').forEach(b => b.classList.remove('selected'));
-                                this.classList.add('selected');
-                                timeInput.value = time;
-                                btnSubmitFake.disabled = false;
-                                updateSummary();
-                            };
-                            slotsContainer.appendChild(btn);
-                        });
+                        slotsContainer.innerHTML = '<div style="grid-column: 1 / -1; color: #ef4444; font-weight: 600;">Lỗi tải khung giờ.</div>';
                     }
                 })
                 .catch(error => {
