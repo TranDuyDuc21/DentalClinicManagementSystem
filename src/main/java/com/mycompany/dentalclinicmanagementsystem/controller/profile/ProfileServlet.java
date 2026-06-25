@@ -101,12 +101,31 @@ public class ProfileServlet extends HttpServlet {
                         uploadDir.mkdirs();
                     }
 
+                    // Thư mục source code gốc để lưu vĩnh viễn trong quá trình code
+                    String sourcePath = "c:\\Users\\admin\\Documents\\Support\\SWP\\DentalClinicManagementSystem\\src\\main\\webapp\\assets\\images\\avatars";
+                    File sourceDir = new File(sourcePath);
+                    if (!sourceDir.exists()) {
+                        sourceDir.mkdirs();
+                    }
+
                     // Tên file mới: user_id_timestamp.jpg
                     String fileExtension = fileName.substring(fileName.lastIndexOf("."));
                     String newFileName = "user_" + loggedUser.getUserId() + "_" + System.currentTimeMillis() + fileExtension;
-                    String savePath = uploadPath + File.separator + newFileName;
                     
+                    // Lưu vào thư mục chạy thực tế (để web hiện ngay lập tức)
+                    String savePath = uploadPath + File.separator + newFileName;
                     avatarPart.write(savePath);
+                    
+                    // Copy sang thư mục source code (để không bị mất khi Clean & Build)
+                    try {
+                        java.nio.file.Files.copy(
+                            java.nio.file.Paths.get(savePath), 
+                            java.nio.file.Paths.get(sourcePath + File.separator + newFileName),
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                        );
+                    } catch (Exception e) {
+                        System.out.println("Lỗi copy ảnh sang source code: " + e.getMessage());
+                    }
                     
                     String avatarUrl = "/assets/images/avatars/" + newFileName;
                     userService.processUpdateAvatar(loggedUser.getUserId(), avatarUrl);
