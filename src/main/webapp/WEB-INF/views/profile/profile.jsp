@@ -31,7 +31,8 @@
                     </div>
                 </div>
                 <input type="file" id="avatarInput" name="avatar" style="display: none;" accept=".png, .jpg, .jpeg" onchange="previewImage(event)">
-                <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Nhấn vào ảnh để thay đổi</p>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 8px; margin-bottom: 0;">Nhấn vào ảnh để thay đổi</p>
+                <div id="avatarError" style="color: var(--error); font-size: 0.85rem; margin-top: 5px; display: none;"></div>
             </div>
 
             <div class="form-group" style="margin-bottom: 15px;">
@@ -111,13 +112,30 @@
 
 <script>
 function previewImage(event) {
-    var reader = new FileReader();
-    reader.onload = function() {
-        var output = document.getElementById('avatarPreview');
-        output.src = reader.result;
+    var file = event.target.files[0];
+    var errorDiv = document.getElementById('avatarError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
     }
-    if(event.target.files[0]) {
-        reader.readAsDataURL(event.target.files[0]);
+
+    if(file) {
+        var fileName = file.name.toLowerCase();
+        if(!fileName.endsWith('.png') && !fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg')) {
+            if (errorDiv) {
+                errorDiv.textContent = 'Chỉ cho phép tải lên ảnh có đuôi .png, .jpg hoặc .jpeg!';
+                errorDiv.style.display = 'block';
+            }
+            event.target.value = ''; // Reset file input
+            return;
+        }
+        
+        var reader = new FileReader();
+        reader.onload = function() {
+            var output = document.getElementById('avatarPreview');
+            output.src = reader.result;
+        }
+        reader.readAsDataURL(file);
     }
 }
 </script>
